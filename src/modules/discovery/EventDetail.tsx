@@ -30,7 +30,13 @@ export function EventDetail({ event, onClose, actions }: { event: PulseEvent | n
               <div className="flex flex-wrap gap-1.5">
                 {[...event.categories, ...event.tags].slice(0, 10).map((t) => <Chip key={t}>{t}</Chip>)}
               </div>
-              {event.aiSummary && <p className="rounded-2xl bg-secondary p-3 text-sm"><b>Summary:</b> {event.aiSummary}</p>}
+              {event.aiSummary && (
+                <div className="rounded-2xl bg-secondary p-3 text-sm">
+                  <p className="mb-1 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">AI summary · may miss details</p>
+                  <p>{event.aiSummary}</p>
+                  {event.sourceUrl && <a href={event.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-bold text-primary underline">Check the original listing</a>}
+                </div>
+              )}
               {event.description && <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/85">{event.description}</p>}
               <p className="text-xs text-muted-foreground">Saving an event doesn't register you. Register or RSVP on the original event page.</p>
               <div className="flex flex-wrap gap-2 pt-1">

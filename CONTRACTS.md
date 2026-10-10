@@ -14,6 +14,7 @@ All models live in `src/shared/types.ts` (single source of truth). `T | null` = 
 | `refreshImport({token})` | same (server fn, protected by `ADMIN_IMPORT_TOKEN`) | → `{ok, result}` or `{ok:false, error}` |
 | `SourceAdapter.fetchEvents({now, fetchedAt})` | `modules/ingestion/adapters.ts` | → `PulseEvent[]` (throw on failure → next adapter) |
 | `enrichWithGemini({title, description})` | `modules/ingestion/gemini.ts` (server) | → `{status:"ok", data:{summary,tags}}` / `unconfigured` / `error` |
+| `createEnrichmentCache().run(events, enrichFn)` / `.apply(events)` | `modules/ingestion/enrichment.ts` (server) | writes only `aiSummary`/`aiTags`; called by `forceImport` (admin), applied by `getFeed` |
 | `recordSwipe(event, dir)` | `modules/recommendations/UserStateProvider.tsx` | updates swipes + prefs; like also saves |
 | `getRecommendations({events, swipes, prefs, filters, now?})` | `modules/recommendations/ranking.ts` | → `RankedEvent[]` (filters first, swiped excluded) |
 | `getSavedEvents` | `useUserState().state.saved` | → `SavedEvent[]` |
