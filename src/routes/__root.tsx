@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/AppShell";
 import { UserStateProvider } from "@/modules/recommendations/UserStateProvider";
 import { AssistantChatProvider } from "@/modules/assistant/AssistantChatProvider";
@@ -136,6 +137,7 @@ function RootComponent() {
               <Outlet />
             </AppShell>
             <RamesesChat />
+            <Toaster />
           </AssistantChatProvider>
         </UserStateProvider>
       </AuthProvider>

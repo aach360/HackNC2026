@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { PulseEvent, SwipeDirection } from "@/shared/types";
+import type { OnboardingProfile, PulseEvent, SwipeDirection } from "@/shared/types";
 import { applySwipe } from "./ranking";
 import { banditFeatures, ensureBandit, updateBandit } from "./bandit";
 import { createLocalStorage, emptyUserState, type UserState, type UserStateStorage } from "./storage";
@@ -15,6 +15,8 @@ interface Ctx {
   saveEvent: (event: PulseEvent) => void;
   togglePlan: (event: PulseEvent) => void;
   setRemindersOptIn: (v: boolean) => void;
+  /** Store onboarding answers; interests become an explicit cold-start prior on topic weights. */
+  setOnboarding: (p: OnboardingProfile) => void;
   reset: () => void;
   /** Swap in state loaded from the signed-in account. */
   replaceState: (s: UserState) => void;
@@ -87,6 +89,14 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
             : { ...s, plan: [...s.plan, { eventId: event.id, addedAt: new Date().toISOString(), event }] },
         ),
       setRemindersOptIn: (v) => update((s) => ({ ...s, prefs: { ...s.prefs, remindersOptIn: v } })),
+      setOnboarding: (p) =>
+        update((s) => {
+          // Explicit cold-start prior: chosen interests get a starting weight. This is NOT
+          // fabricated swipe history — no swipes are written and the bandit count stays put.
+          const weights = { ...s.prefs.weights };
+          for (const id of p.interests) weights[`topic:${id}`] = Math.max(weights[`topic:${id}`] ?? 0, 1.5);
+          return { ...s, prefs: { ...s.prefs, weights, onboarding: p } };
+        }),
       reset: () => update(() => emptyUserState()),
       replaceState: (next) => { history.current = []; setState(next); },
     }),
