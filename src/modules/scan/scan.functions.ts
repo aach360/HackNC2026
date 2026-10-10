@@ -62,7 +62,7 @@ export const scanPoster = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }): Promise<ScanResult> => {
-    const key = process.env.LOVABLE_API_KEY;
+    const key = process.env["LOVABLE_API_KEY"];
     if (!key) return { status: "unconfigured", message: "Photo scanning isn't set up yet." };
     const now = Date.now();
     if (now - windowStart > 60_000) { windowStart = now; windowCount = 0; }
