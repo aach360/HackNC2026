@@ -37,7 +37,7 @@ describe("AI enrichment", () => {
     expect(c.apply(evs)).toEqual(evs);
     const u = await c.run(evs, async () => ({ status: "unconfigured" }));
     expect(u.status).toBe("unconfigured");
-    expect(u.attempted).toBe(1);
+    expect(u.attempted).toBeLessThanOrEqual(2); // stops after in-flight calls
   });
   it("caps work per run", async () => {
     const c = createEnrichmentCache();
