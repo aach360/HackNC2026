@@ -41,7 +41,7 @@ function Discover() {
   const filteredTotal = ranked.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {feed.origin === "demo" && (
         <div className="aero-panel rounded-2xl px-4 py-2 text-xs font-bold text-navy">
           Showing demo events — live Heel Life events couldn't be loaded right now.

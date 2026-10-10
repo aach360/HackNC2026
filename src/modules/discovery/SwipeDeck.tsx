@@ -69,7 +69,7 @@ export function SwipeDeck({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative h-[min(68dvh,600px)] w-full max-w-sm" aria-live="polite">
+      <div className="relative h-[min(calc(100dvh-330px),600px)] min-h-[380px] w-full max-w-sm" aria-live="polite">
         {next && (
           <div key={next.event.id} className="absolute inset-0 scale-[0.95] opacity-80 transition-transform duration-300" aria-hidden>
             <EventCard ranked={next} onDetails={() => {}} />
@@ -109,7 +109,7 @@ export function SwipeDeck({
         </div>
       </div>
 
-      <div className="mt-5 flex items-center gap-5">
+      <div className="mt-4 flex items-center gap-5">
         <OrbButton tone="rose" className="size-16" aria-label="Pass (left arrow)" onClick={() => commit("pass")}>
           <X className="size-8" strokeWidth={3} />
         </OrbButton>

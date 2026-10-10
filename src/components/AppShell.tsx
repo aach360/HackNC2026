@@ -72,7 +72,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-28 pt-5 md:grid-cols-[1fr_300px] md:pb-10">
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-28 pt-4 md:grid-cols-[1fr_300px] md:pb-10">
         <main className="min-w-0">{children}</main>
         <aside className="hidden md:block">
           <TasteSidebar />
