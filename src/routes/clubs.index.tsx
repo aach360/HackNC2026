@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { MessageCircle, Plus, Star, Users } from "lucide-react";
+import { Camera, MessageCircle, Plus, Star, Users } from "lucide-react";
 import { AeroButton, PageTitle, Panel } from "@/components/aero";
 import { StatePanel } from "@/components/StatePanel";
 import { createClub, joinClub, listClubs } from "@/modules/clubs/clubs.functions";
@@ -70,6 +70,9 @@ function ClubsPage() {
   return (
     <div>
       <PageTitle title="Clubs" subtitle="Star the clubs you follow. Members chat here instead of scattered group chats." />
+      <Link to="/scan" className="aero-btn aero-pearl inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold">
+        <Camera className="size-4" /> Scan a poster or club photo
+      </Link>
 
       <Panel className="mb-4 p-4">
         <div className="aero-solid rounded-2xl p-3">

@@ -15,3 +15,4 @@
 - [ ] Hybrid recommender: embeddings + LinUCB bandit + diversity rerank
 - [ ] Calendar view of plan/saved events + download .ics to phone
 - [x] Calendar month view (/calendar, linked from Plan) + .ics download for phones
+- [x] Poster/club photo scan (/scan) via Gemini vision
