@@ -131,6 +131,10 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
   const model = banditModel(input.prefs.bandit);
   const shrink = profile.likes / (profile.likes + C.shrinkK);
   const W = C.weights;
+  // Explicit cold-start prior from onboarding interests. Its share of the total score
+  // fades as real swipe history grows (shrink rises with likes).
+  const priorInterests = new Set(input.prefs.onboarding?.interests ?? []);
+  const priorShare = 1 - shrink;
 
   const scored: Scored[] = pool.map((event) => {
     const sem = vectors[event.id] ?? null;
@@ -163,7 +167,9 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
       }
     }
     const reasons = reasonsFor({ event, rel: 0, sem, fb, b }, profile, hoursAway, recentHit, affinityRecent > cosine(v, space.full) + 0.05);
-    const rel = b.semantic + b.predicted + b.exploration + b.time + W.jitter * jitter(event.id);
+    const interestHits = (event.topics ?? []).filter((t) => priorInterests.has(t)).length;
+    if (!reasons.length && interestHits > 0 && profile.likes === 0) reasons.push("Matches the interests you picked");
+    const rel = b.semantic + b.predicted + b.exploration + b.time + W.interest * priorShare * Math.min(1, interestHits) + W.jitter * jitter(event.id);
     return { event, rel, sem, fb, b: { ...b, reasons } };
   });
   scored.sort((a, b) => b.rel - a.rel);

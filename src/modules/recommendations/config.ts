@@ -15,7 +15,7 @@ export const REC_CONFIG = {
   alpha: 0.6,
   /** Exploration bonus is clamped so it can't dominate strong preferences. */
   maxExploration: 0.6,
-  weights: { semantic: 1.0, predicted: 0.8, exploration: 0.35, time: 0.4, jitter: 0.05 },
+  weights: { semantic: 1.0, predicted: 0.8, exploration: 0.35, time: 0.4, interest: 0.7, jitter: 0.05 },
   /** Passes are weaker evidence than likes (timing, not dislike). */
   negativeWeight: 0.3,
   /** Blend of full-session vs recent likes in the positive profile. */
