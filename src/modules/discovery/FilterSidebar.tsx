@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { DateFilter, EventFilters } from "@/shared/types";
 import { cn } from "@/lib/utils";
-// TODO(rameses.png): placeholder art — swap in the official cropped transparent PNG with the same filename.
-import rameses from "@/assets/rameses.png";
+// Tar Heel foot logo (transparent PNG).
+import rameses from "@/assets/tarheel-foot.png";
 
 const DATES: { v: DateFilter; l: string }[] = [
   { v: "any", l: "Anytime" },
@@ -30,7 +30,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 }
 
 /**
- * Rameses lives inside the sidebar footer, so he moves with the panel's transform.
+ * The Tar Heel foot lives inside the sidebar footer, so he moves with the panel's transform.
  * Closed: shifted right by the panel width so only his horns peek at the screen edge (CSS crop, same image).
  * Open: sits in the footer, non-interactive.
  */
@@ -122,7 +122,7 @@ export function FilterSidebar({
           <div className="flex shrink-0 items-center justify-between bg-navy px-4 py-3 text-navy-foreground">
             <div>
               <p className="font-display text-base font-extrabold">Filter your pulse</p>
-              <p className="text-[11px] opacity-80">{active ? `${active} active` : "Rameses has your back"}</p>
+              <p className="text-[11px] opacity-80">{active ? `${active} active` : "Tar Heels have your back"}</p>
             </div>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close filters" className="rounded-full p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-carolina">
               <X className="size-4" />

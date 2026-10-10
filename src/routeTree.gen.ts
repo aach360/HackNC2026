@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as LabRouteImport } from './routes/lab'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ScanRouteImport } from './routes/scan'
@@ -37,6 +39,11 @@ const AssistantRoute = AssistantRouteImport.update({
   path: '/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -45,6 +52,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const LabRoute = LabRouteImport.update({
   id: '/lab',
   path: '/lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanRoute = PlanRouteImport.update({
@@ -87,8 +99,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -101,8 +115,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -116,8 +132,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -132,8 +150,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -146,8 +166,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -160,8 +182,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -175,8 +199,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AssistantRoute: typeof AssistantRoute
+  AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
   LabRoute: typeof LabRoute
+  OnboardingRoute: typeof OnboardingRoute
   PlanRoute: typeof PlanRoute
   SavedRoute: typeof SavedRoute
   ScanRoute: typeof ScanRoute
@@ -209,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -221,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/lab'
       fullPath: '/lab'
       preLoaderRoute: typeof LabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan': {
@@ -279,8 +319,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AssistantRoute: AssistantRoute,
+  AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
   LabRoute: LabRoute,
+  OnboardingRoute: OnboardingRoute,
   PlanRoute: PlanRoute,
   SavedRoute: SavedRoute,
   ScanRoute: ScanRoute,

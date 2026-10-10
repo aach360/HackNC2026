@@ -14,6 +14,8 @@ interface Ctx {
   togglePlan: (event: PulseEvent) => void;
   setRemindersOptIn: (v: boolean) => void;
   reset: () => void;
+  /** Swap in state loaded from the signed-in account. */
+  replaceState: (s: UserState) => void;
 }
 
 const UserStateContext = createContext<Ctx | null>(null);
@@ -77,6 +79,7 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
         ),
       setRemindersOptIn: (v) => update((s) => ({ ...s, prefs: { ...s.prefs, remindersOptIn: v } })),
       reset: () => update(() => emptyUserState()),
+      replaceState: (next) => { history.current = []; setState(next); },
     }),
     [state, hydrated, update],
   );

@@ -22,6 +22,14 @@ export interface UserStateStorage {
   clear(): void;
 }
 
+/** Fill defaults and reset stale bandit state (swipes, saved events and plan are kept). */
+export function normalizeUserState(parsed: UserState | null | undefined): UserState {
+  if (!parsed || parsed.version !== 1) return emptyUserState();
+  const prefs = { ...emptyPreferences(), ...parsed.prefs };
+  if (prefs.bandit) prefs.bandit = ensureBandit(prefs.bandit);
+  return { ...emptyUserState(), ...parsed, prefs };
+}
+
 const KEY = "pulsematch:v1";
 
 export function createLocalStorage(ls: Pick<Storage, "getItem" | "setItem" | "removeItem"> | null = typeof window !== "undefined" ? window.localStorage : null): UserStateStorage {
@@ -30,12 +38,7 @@ export function createLocalStorage(ls: Pick<Storage, "getItem" | "setItem" | "re
       try {
         const raw = ls?.getItem(KEY);
         if (!raw) return emptyUserState();
-        const parsed = JSON.parse(raw) as UserState;
-        if (parsed.version !== 1) return emptyUserState();
-        const prefs = { ...emptyPreferences(), ...parsed.prefs };
-        // Bandit state from an older feature version is reset; swipes, saved events and plan are kept.
-        if (prefs.bandit) prefs.bandit = ensureBandit(prefs.bandit);
-        return { ...emptyUserState(), ...parsed, prefs };
+        return normalizeUserState(JSON.parse(raw) as UserState);
       } catch {
         return emptyUserState();
       }

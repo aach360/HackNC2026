@@ -16,3 +16,5 @@
 - [ ] Calendar view of plan/saved events + download .ics to phone
 - [x] Calendar month view (/calendar, linked from Plan) + .ics download for phones
 - [x] Poster/club photo scan (/scan) via Gemini vision
+- [x] Swap Rameses mascot for Tar Heel foot logo in filter sidebar
+- [x] Optional sign-in (Google + email) with cloud-saved state and 5-card onboarding
