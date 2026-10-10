@@ -126,12 +126,17 @@ describe("hybrid ranking", () => {
     expect(after[0]!.event.id).toBe(top);
   });
 
-  it("duplicate occurrences collapse; recurring sessions stay", () => {
+  it("repeats collapse to the soonest occurrence; swiping one hides the series", () => {
+    const later = ev("x3", "Music", 34, { title: "Jazz Night" });
     const a = ev("x1", "Music", 10, { title: "Jazz Night" });
-    const dup = ev("x2", "Music", 10, { title: "Jazz  night" });
-    const next = ev("x3", "Music", 34, { title: "Jazz Night" });
-    const ids = getRecommendations({ events: [a, dup, next], swipes: [], prefs: emptyPreferences(), filters: F, now }).map((x) => x.event.id);
-    expect(ids.sort()).toEqual(["x1", "x3"]);
+    const dup = ev("x2", "Music", 10, { title: "Jazz  night!" });
+    const other = ev("y1", "Sports", 12, { title: "Pickup Soccer" });
+    const events = [later, a, dup, other];
+    const ids = getRecommendations({ events, swipes: [], prefs: emptyPreferences(), filters: F, now }).map((x) => x.event.id);
+    expect(ids.sort()).toEqual(["x1", "y1"]);
+    const swipes: Swipe[] = [{ eventId: "x1", direction: "pass", at: now.toISOString() }];
+    const after = getRecommendations({ events, swipes, prefs: emptyPreferences(), filters: F, now }).map((x) => x.event.id);
+    expect(after).toEqual(["y1"]);
   });
 
   it("zero vectors are safe", () => {
