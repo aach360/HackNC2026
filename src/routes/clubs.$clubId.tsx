@@ -76,7 +76,7 @@ function ClubChat() {
   return (
     <div>
       <Link to="/clubs" className="mb-2 inline-flex items-center gap-1 text-sm font-bold text-navy"><ArrowLeft className="size-4" /> Clubs</Link>
-      <PageTitle title={club.name} subtitle={`${club.memberCount} members · you're chatting as ${me.displayName}`} />
+      <PageTitle title={club.name} subtitle={`${club.memberCount} ${club.memberCount === 1 ? "member" : "members"} · you're chatting as ${me.displayName}`} />
 
       <Panel className="mb-3 p-3">
         <div className="aero-solid rounded-2xl p-3 text-xs text-navy">
