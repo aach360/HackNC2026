@@ -66,8 +66,8 @@ describe("cold-start interests prior", () => {
     const prefs = { ...emptyPreferences(), onboarding: { interests: ["live-music"], completedAt: now.toISOString() } };
     const filters = { date: "any" as const, category: null, confirmedFreeOnly: false };
     const ranked = rankHybrid({ events: [other, music], swipes: [], prefs, filters, applyFilters, vectors: {}, now });
-    expect(ranked[0].event.id).toBe("m");
-    expect(ranked[0].breakdown?.reasons).toContain("Matches the interests you picked");
+    expect(ranked[0]!.event.id).toBe("m");
+    expect(ranked[0]!.breakdown?.reasons).toContain("Matches the interests you picked");
   });
 
   it("stores the prior in weights without fabricating swipes", () => {

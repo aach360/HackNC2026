@@ -84,7 +84,13 @@ function Onboarding() {
   /** Persist answers first; only mark onboarding complete after the writes succeed. */
   async function finish() {
     setSaving(true);
-    setOnboarding({ intent, interests: [...interests], major: major.trim() || undefined, year, completedAt: new Date().toISOString() });
+    setOnboarding({
+      interests: [...interests],
+      completedAt: new Date().toISOString(),
+      ...(intent ? { intent } : {}),
+      ...(major.trim() ? { major: major.trim() } : {}),
+      ...(year ? { year } : {}),
+    });
     if (user) {
       const { error } = await supabase.from("profiles").update({ onboarded_at: new Date().toISOString() }).eq("id", user.id);
       if (error) {
