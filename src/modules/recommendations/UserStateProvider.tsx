@@ -52,7 +52,7 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
           // and a repeat swipe on the same event doesn't update the model again.
           const first = !s.swipes.some((x) => x.eventId === event.id);
           const x = features ?? banditFeatures(event, null, new Date());
-          const bandit = first ? updateBandit(ensureBandit(s.prefs.bandit), x, dir === "like" ? 1 : 0) : s.prefs.bandit;
+          const bandit = first ? updateBandit(ensureBandit(s.prefs.bandit), x, dir === "like" ? 1 : 0) : ensureBandit(s.prefs.bandit);
           return {
             ...s,
             swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now }],
