@@ -59,6 +59,13 @@ export interface PulseEvent {
   /** Optional AI enrichment (Gemini). Never overrides the facts above. */
   aiSummary?: string | null;
   aiTags?: string[];
+  /** Classified interests from the shared taxonomy (see shared/taxonomy.ts). Generated labels, not source facts. */
+  topics?: string[];
+  formats?: string[];
+  benefits?: string[];
+  /** topic id → exact source passage supporting it. */
+  topicEvidence?: Record<string, string>;
+  taxonomyVersion?: string;
 }
 
 export type SwipeDirection = "like" | "pass";
@@ -68,6 +75,8 @@ export interface Swipe {
   direction: SwipeDirection;
   /** ISO timestamp */
   at: string;
+  /** Snapshot kept so the recommender can learn from events after they leave the live feed. */
+  event?: PulseEvent;
 }
 
 export interface SavedEvent {
@@ -91,6 +100,18 @@ export interface UserPreferences {
   remindersOptIn: boolean;
   /** Per-user LinUCB state (see recommendations/bandit.ts). Absent = cold start. */
   bandit?: BanditState;
+  /** Onboarding answers. Interests are taxonomy topic IDs used as an explicit cold-start prior. */
+  onboarding?: OnboardingProfile;
+}
+
+export interface OnboardingProfile {
+  /** e.g. "meet-people" | "hobbies" | "curiosity" | "study-break" */
+  intent?: string;
+  interests: string[];
+  /** Optional context only — never a hard filter. "undecided" / "prefer-not-to-say" allowed. */
+  major?: string;
+  year?: string;
+  completedAt?: string;
 }
 
 /** Ridge-regression sufficient statistics for the contextual bandit. A is d×d row-major. */
