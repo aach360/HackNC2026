@@ -21,7 +21,7 @@ describe("tribe adapter", () => {
     const e = mapTribeEvent({ id: 8, title: "Fair", all_day: true, start_date: "2026-11-01 00:00:00", end_date: "2026-11-01 23:59:59", cost: "Free – $10" }, cfg, F)!;
     expect(e.allDay).toBe(true);
     expect(e.startsAt).toBe("2026-11-01T04:00:00.000Z");
-    expect(e.endsAt).toBe("2026-11-02T04:00:00.000Z"); // after DST ends
+    expect(e.endsAt).toBe("2026-11-02T05:00:00.000Z"); // DST ended overnight
     expect(e.costAmount).toBeNull();
   });
 });
