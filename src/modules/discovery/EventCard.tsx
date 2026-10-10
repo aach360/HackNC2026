@@ -36,6 +36,14 @@ export function EventCard({ ranked, onDetails }: { ranked: RankedEvent; onDetail
             <Info className="size-4" /> Details
           </button>
         </div>
+        {ranked.breakdown && (
+          <details className="mt-2 text-xs" onPointerDown={(ev) => ev.stopPropagation()}>
+            <summary className="cursor-pointer font-bold text-primary">Why this event?</summary>
+            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-foreground/80">
+              {ranked.breakdown.reasons.length ? ranked.breakdown.reasons.map((r) => <li key={r}>{r}</li>) : <li>Not enough swipes yet — ordered by timing and variety.</li>}
+            </ul>
+          </details>
+        )}
       </div>
     </article>
   );
