@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { PulseEvent, SwipeDirection } from "@/shared/types";
 import { applySwipe } from "./ranking";
+import { banditFeatures, ensureBandit, updateBandit } from "./bandit";
 import { createLocalStorage, emptyUserState, type UserState, type UserStateStorage } from "./storage";
 
 interface Ctx {
   state: UserState;
   hydrated: boolean;
-  /** recordSwipe(event, direction): like also saves the event. */
-  recordSwipe: (event: PulseEvent, dir: SwipeDirection) => void;
+  /** recordSwipe(event, direction, features?): like also saves the event. `features` = the vector used when the card was shown. */
+  recordSwipe: (event: PulseEvent, dir: SwipeDirection, features?: number[]) => void;
   undoLast: () => void;
   removeSaved: (eventId: string) => void;
   togglePlan: (event: PulseEvent) => void;
@@ -44,13 +45,18 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
     () => ({
       state,
       hydrated,
-      recordSwipe: (event, dir) =>
+      recordSwipe: (event, dir, features) =>
         update((s) => {
           const now = new Date().toISOString();
+          // One explicit swipe = one bandit reward. The auto-save of a like is not a second reward,
+          // and a repeat swipe on the same event doesn't update the model again.
+          const first = !s.swipes.some((x) => x.eventId === event.id);
+          const x = features ?? banditFeatures(event, null, new Date());
+          const bandit = first ? updateBandit(ensureBandit(s.prefs.bandit), x, dir === "like" ? 1 : 0) : s.prefs.bandit;
           return {
             ...s,
             swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now }],
-            prefs: applySwipe(s.prefs, event, dir),
+            prefs: { ...applySwipe(s.prefs, event, dir), bandit },
             saved:
               dir === "like" && !s.saved.some((x) => x.eventId === event.id)
                 ? [...s.saved, { eventId: event.id, savedAt: now, event }]

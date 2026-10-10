@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { eventVectorsQuery } from "@/modules/recommendations/embeddings.functions";
 import { Heart, Sparkles, Waves } from "lucide-react";
 import { eventsQuery } from "@/modules/ingestion/events.functions";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
@@ -34,10 +36,17 @@ function Discover() {
   const [detail, setDetail] = useState<PulseEvent | null>(null);
 
   const categories = useMemo(() => Array.from(new Set(feed.events.flatMap((e) => e.categories))).sort(), [feed.events]);
-  const ranked = useMemo(
-    () => getRecommendations({ events: feed.events, swipes: state.swipes, prefs: state.prefs, filters }),
-    [feed.events, state.swipes, state.prefs, filters],
-  );
+  const { data: vec } = useQuery(eventVectorsQuery);
+  // Freeze the visible card across background updates (e.g. vectors arriving); it changes only after a swipe.
+  const frozen = useRef<string | null>(null);
+  const planIds = useMemo(() => state.plan.map((p) => p.eventId), [state.plan]);
+  const ranked = useMemo(() => {
+    const swiped = new Set(state.swipes.map((s) => s.eventId));
+    const keep = frozen.current && !swiped.has(frozen.current) ? frozen.current : null;
+    const r = getRecommendations({ events: feed.events, swipes: state.swipes, prefs: state.prefs, filters, vectors: vec?.vectors, planIds, frozenId: keep });
+    frozen.current = r[0]?.event.id ?? null;
+    return r;
+  }, [feed.events, state.swipes, state.prefs, filters, vec?.vectors, planIds]);
   const filteredTotal = ranked.length;
 
   return (
@@ -66,7 +75,7 @@ function Discover() {
           </StatePanel>
         )
       ) : (
-        <SwipeDeck ranked={ranked} onSwipe={recordSwipe} onUndo={undoLast} canUndo={state.swipes.length > 0} onDetails={setDetail} />
+        <SwipeDeck ranked={ranked} onSwipe={(e, d) => recordSwipe(e, d, ranked.find((r) => r.event.id === e.id)?.breakdown?.features)} onUndo={undoLast} canUndo={state.swipes.length > 0} onDetails={setDetail} />
       )}
 
       <EventDetail event={detail} onClose={() => setDetail(null)} />

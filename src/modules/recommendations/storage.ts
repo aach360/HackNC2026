@@ -1,5 +1,6 @@
 import type { PlanItem, SavedEvent, Swipe, UserPreferences } from "@/shared/types";
 import { emptyPreferences } from "./ranking";
+import { ensureBandit } from "./bandit";
 
 export interface UserState {
   version: 1;
@@ -31,7 +32,10 @@ export function createLocalStorage(ls: Pick<Storage, "getItem" | "setItem" | "re
         if (!raw) return emptyUserState();
         const parsed = JSON.parse(raw) as UserState;
         if (parsed.version !== 1) return emptyUserState();
-        return { ...emptyUserState(), ...parsed, prefs: { ...emptyPreferences(), ...parsed.prefs } };
+        const prefs = { ...emptyPreferences(), ...parsed.prefs };
+        // Bandit state from an older feature version is reset; swipes, saved events and plan are kept.
+        if (prefs.bandit) prefs.bandit = ensureBandit(prefs.bandit);
+        return { ...emptyUserState(), ...parsed, prefs };
       } catch {
         return emptyUserState();
       }
