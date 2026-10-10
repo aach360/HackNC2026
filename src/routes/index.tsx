@@ -43,7 +43,7 @@ function Discover() {
   const ranked = useMemo(() => {
     const swiped = new Set(state.swipes.map((s) => s.eventId));
     const keep = frozen.current && !swiped.has(frozen.current) ? frozen.current : null;
-    const r = getRecommendations({ events: feed.events, swipes: state.swipes, prefs: state.prefs, filters, vectors: vec?.vectors, planIds, frozenId: keep });
+    const r = getRecommendations({ events: feed.events, swipes: state.swipes, prefs: state.prefs, filters, vectors: vec?.vectors ?? {}, planIds, frozenId: keep });
     frozen.current = r[0]?.event.id ?? null;
     return r;
   }, [feed.events, state.swipes, state.prefs, filters, vec?.vectors, planIds]);
