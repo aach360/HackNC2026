@@ -16,6 +16,7 @@ import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as LabRouteImport } from './routes/lab'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as SavedRouteImport } from './routes/saved'
+import { Route as ScanRouteImport } from './routes/scan'
 import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
 import { Route as ClubsClubIdRouteImport } from './routes/clubs.$clubId'
 import { Route as ApiPublicAgentInboundRouteImport } from './routes/api/public/agent/inbound'
@@ -56,6 +57,11 @@ const SavedRoute = SavedRouteImport.update({
   path: '/saved',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScanRoute = ScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClubsIndexRoute = ClubsIndexRouteImport.update({
   id: '/clubs/',
   path: '/clubs/',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/clubs/': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/clubs': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/scan': typeof ScanRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/clubs/': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/plan'
     | '/saved'
+    | '/scan'
     | '/clubs/$clubId'
     | '/clubs/'
     | '/api/public/agent/inbound'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/plan'
     | '/saved'
+    | '/scan'
     | '/clubs/$clubId'
     | '/clubs'
     | '/api/public/agent/inbound'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/lab'
     | '/plan'
     | '/saved'
+    | '/scan'
     | '/clubs/$clubId'
     | '/clubs/'
     | '/api/public/agent/inbound'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   LabRoute: typeof LabRoute
   PlanRoute: typeof PlanRoute
   SavedRoute: typeof SavedRoute
+  ScanRoute: typeof ScanRoute
   ClubsClubIdRoute: typeof ClubsClubIdRoute
   ClubsIndexRoute: typeof ClubsIndexRoute
   ApiPublicAgentInboundRoute: typeof ApiPublicAgentInboundRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SavedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scan': {
+      id: '/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof ScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/clubs/': {
       id: '/clubs/'
       path: '/clubs'
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabRoute: LabRoute,
   PlanRoute: PlanRoute,
   SavedRoute: SavedRoute,
+  ScanRoute: ScanRoute,
   ClubsClubIdRoute: ClubsClubIdRoute,
   ClubsIndexRoute: ClubsIndexRoute,
   ApiPublicAgentInboundRoute: ApiPublicAgentInboundRoute,

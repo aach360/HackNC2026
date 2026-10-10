@@ -21,3 +21,4 @@
 - The Discover filters live in FilterSidebar (hover/tap-reveal from the left edge) so the swipe card keeps the full height; filter state stays in the Discover route.
 - AI enrichment runs only inside the admin refresh request (bounded count/concurrency/time) and feed reads apply cached results, because edge runtimes may kill detached background work.
 - Calendar export is client-side RFC 5545 in src/modules/plan/ics.ts from local plan/saved state; no server or subscription feed, because user state is device-local.
+- Poster scanning sends a browser-downscaled image to a server function that reads it with Gemini (strict JSON, visible text only) and matches the feed/clubs by token overlap; nothing is stored, because photos may contain people.

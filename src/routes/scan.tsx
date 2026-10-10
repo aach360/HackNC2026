@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { Camera, ExternalLink, ImageUp, Loader2, Users } from "lucide-react";
 import { AeroButton, Chip, PageTitle, Panel } from "@/components/aero";
 import { scanPoster, type ScanResult } from "@/modules/scan/scan.functions";
@@ -85,7 +85,7 @@ function ScanPage() {
             {info.kind === "other" && !info.clubName && !info.eventTitle && <p className="text-sm text-muted-foreground">This doesn't look like a club poster or photo.</p>}
             {info.summary && <p className="text-sm">{info.summary}</p>}
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-              {rows.filter(([, v]) => v).map(([k, v]) => (<><dt key={`${k}t`} className="font-bold text-navy">{k}</dt><dd key={`${k}d`}>{v}</dd></>))}
+              {rows.filter(([, v]) => v).map(([k, v]) => (<Fragment key={k}><dt className="font-bold text-navy">{k}</dt><dd>{v}</dd></Fragment>))}
             </dl>
             {[...info.socials, ...info.emails, ...info.links].length > 0 && (
               <div className="flex flex-wrap gap-1.5">{[...info.socials, ...info.emails, ...info.links].map((s) => <Chip key={s}>{s}</Chip>)}</div>

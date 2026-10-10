@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { MessageCircle, Plus, Star, Users } from "lucide-react";
+import { Camera, MessageCircle, Plus, Star, Users } from "lucide-react";
 import { AeroButton, PageTitle, Panel } from "@/components/aero";
 import { StatePanel } from "@/components/StatePanel";
 import { createClub, joinClub, listClubs } from "@/modules/clubs/clubs.functions";
