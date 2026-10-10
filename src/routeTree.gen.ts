@@ -14,6 +14,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as SavedRouteImport } from './routes/saved'
+import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
+import { Route as ClubsClubIdRouteImport } from './routes/clubs.$clubId'
+import { Route as ApiPublicAgentInboundRouteImport } from './routes/api/public/agent/inbound'
+import { Route as ApiPublicAgentOutboxRouteImport } from './routes/api/public/agent/outbox'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +44,26 @@ const SavedRoute = SavedRouteImport.update({
   path: '/saved',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubsIndexRoute = ClubsIndexRouteImport.update({
+  id: '/clubs/',
+  path: '/clubs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClubsClubIdRoute = ClubsClubIdRouteImport.update({
+  id: '/clubs/$clubId',
+  path: '/clubs/$clubId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAgentInboundRoute = ApiPublicAgentInboundRouteImport.update({
+  id: '/api/public/agent/inbound',
+  path: '/api/public/agent/inbound',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicAgentOutboxRoute = ApiPublicAgentOutboxRouteImport.update({
+  id: '/api/public/agent/outbox',
+  path: '/api/public/agent/outbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +71,10 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/clubs/$clubId': typeof ClubsClubIdRoute
+  '/clubs/': typeof ClubsIndexRoute
+  '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
+  '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +82,10 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/clubs/$clubId': typeof ClubsClubIdRoute
+  '/clubs': typeof ClubsIndexRoute
+  '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
+  '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +94,45 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
+  '/clubs/$clubId': typeof ClubsClubIdRoute
+  '/clubs/': typeof ClubsIndexRoute
+  '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
+  '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/assistant' | '/plan' | '/saved'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/plan'
+    | '/saved'
+    | '/clubs/$clubId'
+    | '/clubs/'
+    | '/api/public/agent/inbound'
+    | '/api/public/agent/outbox'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/assistant' | '/plan' | '/saved'
-  id: '__root__' | '/' | '/admin' | '/assistant' | '/plan' | '/saved'
+  to:
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/plan'
+    | '/saved'
+    | '/clubs/$clubId'
+    | '/clubs'
+    | '/api/public/agent/inbound'
+    | '/api/public/agent/outbox'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/assistant'
+    | '/plan'
+    | '/saved'
+    | '/clubs/$clubId'
+    | '/clubs/'
+    | '/api/public/agent/inbound'
+    | '/api/public/agent/outbox'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +141,10 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   PlanRoute: typeof PlanRoute
   SavedRoute: typeof SavedRoute
+  ClubsClubIdRoute: typeof ClubsClubIdRoute
+  ClubsIndexRoute: typeof ClubsIndexRoute
+  ApiPublicAgentInboundRoute: typeof ApiPublicAgentInboundRoute
+  ApiPublicAgentOutboxRoute: typeof ApiPublicAgentOutboxRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +184,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SavedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clubs/': {
+      id: '/clubs/'
+      path: '/clubs'
+      fullPath: '/clubs/'
+      preLoaderRoute: typeof ClubsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clubs/$clubId': {
+      id: '/clubs/$clubId'
+      path: '/clubs/$clubId'
+      fullPath: '/clubs/$clubId'
+      preLoaderRoute: typeof ClubsClubIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/agent/inbound': {
+      id: '/api/public/agent/inbound'
+      path: '/api/public/agent/inbound'
+      fullPath: '/api/public/agent/inbound'
+      preLoaderRoute: typeof ApiPublicAgentInboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/agent/outbox': {
+      id: '/api/public/agent/outbox'
+      path: '/api/public/agent/outbox'
+      fullPath: '/api/public/agent/outbox'
+      preLoaderRoute: typeof ApiPublicAgentOutboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +221,10 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   PlanRoute: PlanRoute,
   SavedRoute: SavedRoute,
+  ClubsClubIdRoute: ClubsClubIdRoute,
+  ClubsIndexRoute: ClubsIndexRoute,
+  ApiPublicAgentInboundRoute: ApiPublicAgentInboundRoute,
+  ApiPublicAgentOutboxRoute: ApiPublicAgentOutboxRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,0 +1,67 @@
+/**
+ * PulseMatch iMessage agent — built on Photon Spectrum (photon.codes/spectrum).
+ * Runs as a long-lived process (laptop or any always-on box), NOT inside the website.
+ *
+ *   cd agent && bun install && bun run index.ts
+ *
+ * Env: PROJECT_ID, PROJECT_SECRET (from app.photon.codes, promo HACKWITHPHOTON),
+ *      PULSEMATCH_URL (e.g. https://<your-site>.lovable.app), PHOTON_AGENT_TOKEN (same value as the website's secret).
+ */
+import { Spectrum } from "spectrum-ts";
+import { imessage } from "spectrum-ts/providers/imessage";
+
+const BASE = process.env.PULSEMATCH_URL?.replace(/\/$/, "");
+const TOKEN = process.env.PHOTON_AGENT_TOKEN;
+if (!BASE || !TOKEN || !process.env.PROJECT_ID || !process.env.PROJECT_SECRET) {
+  console.error("Missing env: PROJECT_ID, PROJECT_SECRET, PULSEMATCH_URL, PHOTON_AGENT_TOKEN");
+  process.exit(1);
+}
+const headers = { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" };
+
+const app = await Spectrum({
+  projectId: process.env.PROJECT_ID,
+  projectSecret: process.env.PROJECT_SECRET,
+  providers: [imessage.config()],
+});
+
+// Remember each phone's conversation so outbound texts reuse it.
+const spaces = new Map<string, any>();
+
+async function inbound() {
+  for await (const [space, message] of app.messages) {
+    const from: string = (message as any).sender?.id ?? (message as any).from ?? "";
+    const text: string = (message as any).text ?? (message as any).content ?? "";
+    if (!from || !text) continue;
+    spaces.set(from, space);
+    await space.responding(async () => {
+      const r = await fetch(`${BASE}/api/public/agent/inbound`, { method: "POST", headers, body: JSON.stringify({ from, text }) });
+      const j = (await r.json().catch(() => ({}))) as { reply?: string | null };
+      if (j.reply) await message.reply(j.reply);
+    });
+  }
+}
+
+async function outbound() {
+  let cursor = new Date().toISOString();
+  for (;;) {
+    try {
+      const r = await fetch(`${BASE}/api/public/agent/outbox?since=${encodeURIComponent(cursor)}`, { headers });
+      if (r.ok) {
+        const j = (await r.json()) as { cursor: string; messages: { to: string; text: string }[] };
+        cursor = j.cursor;
+        for (const m of j.messages) {
+          const space = spaces.get(m.to);
+          // Spectrum can only reply into conversations it has seen; members start one by texting "join CODE Name".
+          if (space?.send) await space.send(m.text);
+          else console.warn("No open conversation yet for", m.to);
+        }
+      }
+    } catch (e) {
+      console.error("outbox poll failed", e);
+    }
+    await new Promise((res) => setTimeout(res, 5000));
+  }
+}
+
+console.log("PulseMatch iMessage agent running");
+await Promise.all([inbound(), outbound()]);

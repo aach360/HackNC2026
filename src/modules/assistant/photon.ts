@@ -1,14 +1,9 @@
 /**
- * Photon messaging integration boundary — NOT IMPLEMENTED.
- * Owner: feat/chat-audio. Do not invent endpoints; fill in from Photon's real docs.
- * Until configured, `photonStatus()` reports "unconfigured" and no message is ever reported as sent.
+ * Photon (Spectrum) integration boundary.
+ * The iMessage agent runs as a separate process in /agent and talks to the site via
+ * /api/public/agent/inbound and /api/public/agent/outbox, authorized by PHOTON_AGENT_TOKEN.
+ * Until that secret is set, the endpoints answer 503 "unconfigured" — nothing is ever reported as sent.
  */
-export interface PhotonClient {
-  sendMessage(input: { to: string; text: string }): Promise<{ delivered: boolean; messageId: string }>;
-}
-
-export const photonClient: PhotonClient | null = null;
-
 export function photonStatus(): "unconfigured" | "ready" {
-  return photonClient ? "ready" : "unconfigured";
+  return process.env["PHOTON_AGENT_TOKEN"] ? "ready" : "unconfigured";
 }

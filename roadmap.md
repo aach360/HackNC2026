@@ -4,4 +4,6 @@
 - [x] Glossy aqua/sky/bubble visual system across all tabs
 - [x] Tests (dedupe, expired, persistence, ranking)
 - [x] Docs: README, CONTRACTS.md, TEAM.md, .env.example, supabase/schema.sql, AGENTS.md
+- [x] Clubs: star, join by code, members-only chat, iMessage agent endpoints + Spectrum script
+- [ ] Photon keys + PHOTON_AGENT_TOKEN — waiting on team
 - [ ] Secrets (ADMIN_IMPORT_TOKEN, GEMINI_API_KEY, ELEVENLABS_API_KEY) — waiting on team
