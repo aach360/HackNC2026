@@ -25,7 +25,7 @@ const rss = `<?xml version="1.0"?><rss version="2.0" xmlns:ev="events"><channel>
 <item><title>Wrong ns</title><link>https://heellife.unc.edu/event/4</link><start xmlns="other">Sun, 11 Oct 2026 17:00:00 GMT</start></item>
 </channel></rss>`;
 
-const localist = (page: number, total: number, events: unknown[]) => ({ events, page: { current: page, total, next_page: page < total ? page + 1 : null } });
+const localist = (page: number, total: number, events: any[]): any => ({ events, page: { current: page, total, next_page: page < total ? page + 1 : null } });
 const lev = (id: number, instances: { id: number; start: string; end?: string | null; all_day?: boolean }[], extra: Record<string, unknown> = {}) => ({
   event: { id, title: `Event ${id}`, localist_url: `https://calendar.unc.edu/event/${id}`, status: "live", free: false, ticket_cost: null, event_instances: instances.map((i) => ({ event_instance: i })), ...extra },
 });
