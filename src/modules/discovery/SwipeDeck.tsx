@@ -69,7 +69,7 @@ export function SwipeDeck({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative h-[min(calc(100dvh-330px),600px)] min-h-[380px] w-full max-w-sm" aria-live="polite">
+      <div className="relative h-[min(calc(100dvh_-_330px),600px)] min-h-[380px] w-full max-w-sm" aria-live="polite">
         {next && (
           <div key={next.event.id} className="absolute inset-0 scale-[0.95] opacity-80 transition-transform duration-300" aria-hidden>
             <EventCard ranked={next} onDetails={() => {}} />
