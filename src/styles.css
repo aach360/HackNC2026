@@ -250,16 +250,20 @@
 /* Discover filter sidebar + Rameses peek */
 :root { --carolina: oklch(0.67 0.11 242); }
 @theme inline { --color-carolina: var(--carolina); }
-.filter-sidebar { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease-out; will-change: transform; }
-.filter-closed { transform: translateX(-100%); opacity: 0; }
-.filter-open { transform: translateX(0); opacity: 1; }
+.filter-sidebar { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); will-change: transform; }
+.filter-closed { transform: translateX(-100%); }
+.filter-open { transform: translateX(0); }
+.filter-body { transition: opacity 280ms ease-out; }
+.filter-closed .filter-body { opacity: 0; }
+/* Closed: undo the panel offset so the horns peek at the screen edge. */
+.rameses-peek { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); }
+.rameses-peek-closed { transform: translateX(min(18rem, 85vw)); }
+.filter-scroll { mask-image: linear-gradient(to bottom, #000 calc(100% - 2rem), transparent); padding-bottom: 2rem; }
 .rameses-img { transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 .rameses-down { transform: translateY(62%); }
 .rameses-up { transform: translateY(0) rotate(-6deg); }
 @media (prefers-reduced-motion: reduce) {
-  .filter-sidebar { transition: opacity 200ms linear; }
-  .filter-closed, .filter-open { transform: none; }
-  .filter-closed { pointer-events: none; }
-  .rameses-img { transition: opacity 200ms linear; }
+  .filter-sidebar, .rameses-peek, .rameses-img { transition: none; }
+  .filter-body { transition: opacity 200ms linear; }
   .rameses-up { transform: none; }
 }
