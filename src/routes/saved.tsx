@@ -7,6 +7,7 @@ import { EventImage } from "@/modules/discovery/EventImage";
 import { StatePanel } from "@/components/StatePanel";
 import { AeroButton, PageTitle, Panel } from "@/components/aero";
 import { formatEventDate, hasEnded } from "@/shared/time";
+import { useCancelledIds } from "@/modules/discovery/useCancelledIds";
 import type { PulseEvent } from "@/shared/types";
 
 export const Route = createFileRoute("/saved")({
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/saved")({
 function Saved() {
   const { state, hydrated, removeSaved, togglePlan } = useUserState();
   const [detail, setDetail] = useState<PulseEvent | null>(null);
+  const cancelled = useCancelledIds();
   const saved = [...state.saved].sort((a, b) => a.event.startsAt.localeCompare(b.event.startsAt));
   const inPlan = (id: string) => state.plan.some((p) => p.eventId === id);
 
@@ -48,6 +50,7 @@ function Saved() {
                   <button onClick={() => setDetail(e)} className="text-left">
                     <h3 className="line-clamp-2 text-sm font-bold text-navy">{e.title}</h3>
                     <p className="mt-0.5 text-xs font-semibold text-muted-foreground">{formatEventDate(e)}</p>
+                    {cancelled.has(e.id) && <p className="text-xs font-bold text-destructive">Cancelled by the organizer</p>}
                     {hasEnded(e) && <p className="text-xs font-bold text-destructive">This event has ended</p>}
                   </button>
                   <div className="mt-auto flex gap-2 pt-2">

@@ -98,7 +98,7 @@ function ClubsPage() {
           )}
           {mode === "create" && (
             <div className="mt-3 grid gap-2">
-              <input value={clubName} onChange={(e) => setClubName(e.target.value)} maxLength={80} placeholder="Club name (match its Heel Life name to see its events)" className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
+              <input value={clubName} onChange={(e) => setClubName(e.target.value)} maxLength={80} placeholder="Club name (match its Heel Life or calendar organizer name to see its events)" className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
               <textarea value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={500} rows={2} placeholder="What's the club about? (optional)" className="rounded-xl border border-border bg-background px-3 py-2 text-sm" />
               <AeroButton tone="grass" disabled={busy || clubName.trim().length < 2} className="justify-self-start px-4 py-1.5 text-sm" onClick={submit}>Create & get join code</AeroButton>
             </div>

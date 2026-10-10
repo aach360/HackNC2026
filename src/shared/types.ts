@@ -5,7 +5,11 @@
  * Convention: `T | null` means "the source did not tell us" — never invent a value.
  */
 
-export type EventSource = "heellife-json" | "heellife-rss" | "demo" | "submission";
+/** "heellife-json" is retained for old saved snapshots only; the default Heel Life transport is RSS. */
+export type EventSource = "heellife-json" | "heellife-rss" | "unc-calendar" | "carrboro" | "ticketmaster" | "demo" | "submission";
+
+/** Registry ID for a live source (Heel Life JSON/RSS are transports of one source). */
+export type SourceId = "heellife" | "unc-calendar" | "carrboro" | "ticketmaster";
 
 export type EventStatus = "scheduled" | "cancelled" | "unknown";
 
@@ -44,6 +48,14 @@ export interface PulseEvent {
   lastFetchedAt: string;
   /** True only for fixture/demo data. Demo and real events are never mixed in one feed. */
   isDemo: boolean;
+  /** Occurrence ID for recurring sources (Localist instance, ICS RECURRENCE-ID). Null/absent = single occurrence. */
+  sourceOccurrenceId?: string | null;
+  /** True = date-only listing. startsAt/endsAt then hold America/New_York midnights (end exclusive), not a meeting time. */
+  allDay?: boolean | null;
+  /** Every host the source lists (organizer = primary). */
+  hosts?: string[];
+  /** Raw source status string, kept for audit. */
+  sourceStatus?: string | null;
   /** Optional AI enrichment (Gemini). Never overrides the facts above. */
   aiSummary?: string | null;
   aiTags?: string[];
@@ -87,12 +99,34 @@ export interface EventFilters {
   confirmedFreeOnly: boolean;
 }
 
+export type SourceRunStatus = "ok" | "error" | "unconfigured";
+
+/** Per-source health for one refresh. A healthy empty source is status "ok" with eventCount 0. */
+export interface SourceStatus {
+  source: SourceId;
+  status: SourceRunStatus;
+  /** When the events being served were fetched (may be older than the last attempt if stale). */
+  fetchedAt: string | null;
+  eventCount: number;
+  /** False when pagination was truncated or a later page failed. */
+  complete: boolean;
+  /** Serving a last-known-good snapshot because the latest attempt failed. */
+  stale: boolean;
+  /** Records skipped for missing identity/date fields. */
+  skipped: number;
+  /** Safe message, never contains credentials. */
+  error: string | null;
+}
+
 export interface EventFeed {
   events: PulseEvent[];
-  /** Where the events came from. "demo" means real sources failed. */
-  origin: EventSource;
+  /** "live" = one or more real sources; "demo" = every real source failed. Never mixed. */
+  origin: "live" | "demo";
   fetchedAt: string;
   warnings: string[];
+  sources: SourceStatus[];
+  /** IDs the sources explicitly marked cancelled — lets Saved/Plan flag them. */
+  cancelledIds: string[];
 }
 
 export interface RankedEvent {

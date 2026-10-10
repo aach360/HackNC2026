@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMemoryRepository } from "@/modules/ingestion/store";
 import { mapHeelLifeJson, parseHeelLifeRss } from "@/modules/ingestion/adapters";
-import { runImport } from "@/modules/ingestion/importer";
 import { buildDemoEvents } from "@/fixtures/demo-events";
 import { applySwipe, emptyPreferences, getRecommendations } from "@/modules/recommendations/ranking";
 import { createLocalStorage, emptyUserState } from "@/modules/recommendations/storage";
@@ -12,20 +11,19 @@ const now = new Date("2026-10-10T16:00:00Z");
 const json = (id: string, startsOn: string, endsOn: string, name = "Event") =>
   mapHeelLifeJson({ id, name, startsOn, endsOn, description: "<p>Hi &amp; <b>welcome</b></p>", theme: "Arts", benefitNames: ["Free Food"] }, now.toISOString());
 
-describe("ingestion", () => {
-  it("dedupes across JSON and RSS and updates on re-import", () => {
+describe("ingestion (basic)", () => {
+  const RSS = (inner: string) => `<rss version="2.0"><channel>${inner}</channel></rss>`;
+  it("JSON and RSS transports share one Heel Life identity", () => {
     const repo = createMemoryRepository();
     repo.upsertMany([json("1", "2026-10-11T20:00:00Z", "2026-10-11T22:00:00Z", "Old title")]);
-    const rss = parseHeelLifeRss(
-      `<item><title>New title</title><link>https://heellife.unc.edu/event/1</link><start xmlns="events">Sun, 11 Oct 2026 20:00:00 GMT</start><end xmlns="events">Sun, 11 Oct 2026 22:00:00 GMT</end><category>Arts</category></item>`,
+    const { events } = parseHeelLifeRss(
+      RSS(`<item><title>New title</title><link>https://heellife.unc.edu/event/1</link><start xmlns="events">Sun, 11 Oct 2026 20:00:00 GMT</start><end xmlns="events">Sun, 11 Oct 2026 22:00:00 GMT</end><category>Arts</category></item>`),
       now.toISOString(),
     );
-    const r = repo.upsertMany(rss);
-    expect(r).toEqual({ inserted: 0, updated: 1 });
+    expect(repo.upsertMany(events)).toEqual({ inserted: 0, updated: 1 });
     const list = repo.listUpcoming(now);
     expect(list).toHaveLength(1);
     expect(list[0]!.title).toBe("New title");
-    expect(list[0]!.sourceUrl).toBe("https://heellife.unc.edu/event/1");
   });
 
   it("excludes ended events", () => {
@@ -39,20 +37,6 @@ describe("ingestion", () => {
     expect(e.description).toBe("Hi & welcome");
     expect(e.tags).toContain("free food");
     expect(e.costAmount).toBeNull();
-  });
-
-  it("falls back to the next adapter when one fails", async () => {
-    const repo = createMemoryRepository();
-    const r = await runImport(
-      [
-        { name: "heellife-json", fetchEvents: async () => { throw new Error("boom"); } },
-        { name: "heellife-rss", fetchEvents: async () => [json("r", "2026-10-12T20:00:00Z", "2026-10-12T22:00:00Z")] },
-      ],
-      repo,
-      now,
-    );
-    expect(r.origin).toBe("heellife-rss");
-    expect(r.warnings[0]).toMatch(/boom/);
   });
 });
 

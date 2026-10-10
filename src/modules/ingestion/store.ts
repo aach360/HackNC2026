@@ -1,19 +1,21 @@
 import type { PulseEvent } from "@/shared/types";
 import { hasEnded } from "@/shared/time";
 
-/** Dedupe key: source family + source event ID (JSON and RSS share "heellife"). */
-export function dedupeKey(e: Pick<PulseEvent, "source" | "sourceEventId">): string {
-  const family = e.source.startsWith("heellife") ? "heellife" : e.source;
-  return `${family}:${e.sourceEventId}`;
+/**
+ * Dedupe key = canonical source + occurrence identity, i.e. the event `id`
+ * (Heel Life JSON and RSS share "heellife:<id>"; Localist keeps one row per instance).
+ */
+export function dedupeKey(e: Pick<PulseEvent, "id">): string {
+  return e.id;
 }
 
 /**
  * Event repository. Default implementation is in-memory (per server instance).
- * Swap for a database-backed version (see supabase/schema.sql) without
- * changing callers.
+ * Swap for a database-backed version (see supabase/schema.sql) without changing callers.
  */
 export interface EventRepository {
   upsertMany(events: PulseEvent[]): { inserted: number; updated: number };
+  /** Rechecks expiry at read time; drops cancelled. */
   listUpcoming(now?: Date): PulseEvent[];
   clear(): void;
 }
@@ -29,7 +31,6 @@ export function createMemoryRepository(): EventRepository {
         const prev = map.get(key);
         if (prev) {
           updated++;
-          // Keep AI enrichment from earlier imports; source facts always win.
           map.set(key, { ...e, aiSummary: e.aiSummary ?? prev.aiSummary ?? null, aiTags: e.aiTags ?? prev.aiTags ?? [] });
         } else {
           inserted++;

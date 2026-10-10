@@ -8,6 +8,8 @@ import { generatePlanAudio } from "@/modules/plan/audio.functions";
 import { StatePanel } from "@/components/StatePanel";
 import { AeroButton, OrbIcon, PageTitle, Panel } from "@/components/aero";
 import { Switch } from "@/components/ui/switch";
+import { sourceLabel } from "@/modules/discovery/sourceLabel";
+import { useCancelledIds } from "@/modules/discovery/useCancelledIds";
 import { formatDayHeading, formatTime, nyDateKey } from "@/shared/time";
 
 export const Route = createFileRoute("/plan")({
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/plan")({
 
 function Plan() {
   const { state, hydrated, togglePlan, setRemindersOptIn } = useUserState();
+  const cancelled = useCancelledIds();
   const plan = useMemo(() => getPlan(state.plan), [state.plan]);
   const narration = useMemo(() => planNarration(state.plan), [state.plan]);
   const audioFn = useServerFn(generatePlanAudio);
@@ -83,12 +86,13 @@ function Plan() {
                   <li key={e.id}>
                     <Panel className="flex items-start gap-3 p-3">
                       <div className="aero-btn aero-aqua w-20 shrink-0 rounded-2xl px-2 py-2 text-center text-xs font-bold">
-                        {formatTime(e.startsAt)}
-                        {e.endsAt && <div className="opacity-90">– {formatTime(e.endsAt)}</div>}
+                        {e.allDay ? "All day" : formatTime(e.startsAt)}
+                        {e.endsAt && !e.allDay && <div className="opacity-90">– {formatTime(e.endsAt)}</div>}
                       </div>
                       <div className="aero-solid min-w-0 flex-1 rounded-2xl p-3">
                         <h3 className="font-bold text-navy">{e.title}</h3>
                         {e.location && <p className="text-xs font-semibold text-muted-foreground">{e.location}</p>}
+                        {cancelled.has(e.id) && <p className="mt-1 text-xs font-bold text-destructive">Cancelled by the organizer</p>}
                         {overlapsWith.length > 0 && (
                           <p className="mt-1 flex items-center gap-1 text-xs font-bold text-destructive">
                             <AlertTriangle className="size-3.5" /> Overlaps with {overlapsWith.length} other event{overlapsWith.length > 1 ? "s" : ""}
@@ -96,7 +100,7 @@ function Plan() {
                         )}
                         {e.sourceUrl && (
                           <a href={e.sourceUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-primary">
-                            Register on Heel Life <ExternalLink className="size-3" />
+                            Register on {sourceLabel(e)} <ExternalLink className="size-3" />
                           </a>
                         )}
                       </div>
