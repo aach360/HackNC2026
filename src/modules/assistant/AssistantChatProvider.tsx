@@ -13,7 +13,9 @@ interface AssistantChatCtx {
   clear: () => void;
 }
 
-const Ctx = createContext<AssistantChatCtx | null>(null);
+// Keep one context identity across hot reloads; a re-created context orphans consumers from the mounted provider.
+const g = globalThis as { __pulseAssistantChatCtx?: React.Context<AssistantChatCtx | null> };
+const Ctx = (g.__pulseAssistantChatCtx ??= createContext<AssistantChatCtx | null>(null));
 
 /**
  * Shared assistant conversation. The Assistant tab and the corner Rameses widget

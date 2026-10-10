@@ -9,7 +9,9 @@ interface AuthCtx {
   signOut: () => Promise<void>;
 }
 
-const Ctx = createContext<AuthCtx>({ user: null, ready: false, signOut: async () => {} });
+// Keep one context identity across hot reloads so consumers stay attached to the mounted provider.
+const g = globalThis as { __pulseAuthCtx?: React.Context<AuthCtx> };
+const Ctx = (g.__pulseAuthCtx ??= createContext<AuthCtx>({ user: null, ready: false, signOut: async () => {} }));
 
 /** Optional sign-in. Signed-out visitors keep the anonymous on-device session. */
 export function AuthProvider({ children }: { children: ReactNode }) {
