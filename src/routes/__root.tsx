@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { UserStateProvider } from "@/modules/recommendations/UserStateProvider";
+import { AuthProvider } from "@/modules/auth/AuthProvider";
+import { CloudSync } from "@/modules/auth/CloudSync";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -124,11 +126,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <UserStateProvider>
-        <AppShell>
-          <Outlet />
-        </AppShell>
-      </UserStateProvider>
+      <AuthProvider>
+        <UserStateProvider>
+          <CloudSync />
+          <AppShell>
+            <Outlet />
+          </AppShell>
+        </UserStateProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

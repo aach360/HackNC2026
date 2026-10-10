@@ -15,6 +15,7 @@ import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as LabRouteImport } from './routes/lab'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ScanRouteImport } from './routes/scan'
@@ -51,6 +52,11 @@ const CalendarRoute = CalendarRouteImport.update({
 const LabRoute = LabRouteImport.update({
   id: '/lab',
   path: '/lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanRoute = PlanRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calendar': typeof CalendarRoute
   '/lab': typeof LabRoute
+  '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/scan': typeof ScanRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calendar'
     | '/lab'
+    | '/onboarding'
     | '/plan'
     | '/saved'
     | '/scan'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalendarRoute: typeof CalendarRoute
   LabRoute: typeof LabRoute
+  OnboardingRoute: typeof OnboardingRoute
   PlanRoute: typeof PlanRoute
   SavedRoute: typeof SavedRoute
   ScanRoute: typeof ScanRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/lab'
       fullPath: '/lab'
       preLoaderRoute: typeof LabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan': {
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalendarRoute: CalendarRoute,
   LabRoute: LabRoute,
+  OnboardingRoute: OnboardingRoute,
   PlanRoute: PlanRoute,
   SavedRoute: SavedRoute,
   ScanRoute: ScanRoute,

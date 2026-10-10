@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, CalendarDays, Heart, Sparkles, Users } from "lucide-react";
+import { UserRound, Bot, CalendarDays, Heart, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import sky from "@/assets/sky-bg.jpg";
+import { useAuth } from "@/modules/auth/AuthProvider";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
 import { TasteSidebar } from "@/modules/recommendations/TasteSidebar";
 
@@ -38,6 +39,17 @@ function Ambient() {
   );
 }
 
+function AccountButton() {
+  const { user, ready } = useAuth();
+  if (!ready) return <span className="w-16" aria-hidden />;
+  return (
+    <Link to="/auth" className="aero-btn aero-pearl inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold">
+      <UserRound className="size-4" />
+      {user ? "Account" : "Sign in"}
+    </Link>
+  );
+}
+
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2">
@@ -70,6 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
+          <AccountButton />
         </div>
       </header>
 

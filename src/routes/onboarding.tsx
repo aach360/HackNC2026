@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2, Sparkles } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import type { PulseEvent, RankedEvent } from "@/shared/types";
 import { eventsQuery } from "@/modules/ingestion/events.functions";
@@ -63,8 +64,8 @@ function Onboarding() {
     navigate({ to: "/" });
   }
 
-  if (feed.isLoading) return <StatePanel kind="loading" title="Finding events…" />;
-  if (!cards.current?.length) return <StatePanel kind="empty" title="No events to show yet" />;
+  if (feed.isLoading) return <StatePanel icon={<Loader2 className="size-6 animate-spin" />} title="Finding events…" />;
+  if (!cards.current?.length) return <StatePanel icon={<Sparkles className="size-6" />} title="No events to show yet" />;
 
   return (
     <div className="space-y-4">
