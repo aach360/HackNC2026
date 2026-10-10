@@ -193,10 +193,12 @@ export function parseHeelLifeRss(xml: string, fetchedAt: string): { events: Puls
 export const heelLifeAdapter: SourceAdapter = {
   id: "heellife",
   optional: false,
-  async fetch({ fetchedAt }) {
+  async fetch({ now, fetchedAt, windowDays }) {
     const xml = await boundedText("https://heellife.unc.edu/events.rss", "heellife RSS", "application/rss+xml, application/xml");
     const { events, skipped } = parseHeelLifeRss(xml, fetchedAt);
-    return { status: "ok", events, complete: true, skipped, warnings: [] };
+    // Feed spans months; keep the discovery window locally.
+    const limit = now.getTime() + windowDays * 86_400_000;
+    return { status: "ok", events: events.filter((e) => Date.parse(e.startsAt) < limit), complete: true, skipped, warnings: [] };
   },
 };
 
