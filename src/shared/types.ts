@@ -103,3 +103,34 @@ export interface RankedEvent {
 }
 
 export const DISPLAY_TZ = "America/New_York";
+
+/* ---------------- Clubs (shared, server-persisted) ---------------- */
+
+export interface Club {
+  id: string;
+  name: string;
+  description: string | null;
+  memberCount: number;
+  createdAt: string;
+}
+
+/** What this device knows about its own membership. Join code is only revealed to members. */
+export interface ClubMembership {
+  clubId: string;
+  memberId: string;
+  displayName: string;
+  joinCode: string;
+}
+
+export type ChatSource = "web" | "imessage";
+
+export interface ClubMessage {
+  id: string;
+  clubId: string;
+  authorName: string;
+  body: string;
+  source: ChatSource;
+  createdAt: string;
+  /** True when this device wrote it. */
+  mine: boolean;
+}

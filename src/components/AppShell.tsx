@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, CalendarDays, Heart, Sparkles } from "lucide-react";
+import { Bot, CalendarDays, Heart, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import sky from "@/assets/sky-bg.jpg";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
@@ -9,6 +9,7 @@ const NAV = [
   { to: "/", label: "Discover", icon: Sparkles },
   { to: "/saved", label: "Saved", icon: Heart },
   { to: "/plan", label: "Plan", icon: CalendarDays },
+  { to: "/clubs", label: "Clubs", icon: Users },
   { to: "/assistant", label: "Assistant", icon: Bot },
 ] as const;
 
@@ -61,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: n.to !== "/clubs" }}
                 className="rounded-full px-4 py-1.5 text-sm font-bold text-navy hover:bg-card"
                 activeProps={{ className: "aero-btn aero-aqua" }}
               >
@@ -80,12 +81,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <nav aria-label="Main" className="aero-panel fixed inset-x-3 bottom-3 z-40 rounded-full md:hidden">
-        <ul className="grid grid-cols-4 p-1.5">
+        <ul className="grid grid-cols-5 p-1.5">
           {NAV.map((n) => (
             <li key={n.to}>
               <Link
                 to={n.to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: n.to !== "/clubs" }}
                 className="relative flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] font-bold text-navy"
                 activeProps={{ className: "aero-btn aero-aqua" }}
               >
