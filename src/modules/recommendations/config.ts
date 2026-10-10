@@ -4,12 +4,11 @@
  */
 export const REC_CONFIG = {
   /** Version of the feature mapping. Changing dims/projection must bump this (bandit state resets). */
-  featureVersion: "linucb-f37-v1",
+  featureVersion: "linucb-f59-v2",
   /** Dimension of the semantic vectors the server sends (random projection of the full embedding). */
   semanticDims: 64,
-  /** Bandit feature layout: 24 projected semantic + 8 hashed tag buckets + 4 context + 1 intercept. */
+  /** Bandit feature layout: 24 projected semantic + one dim per taxonomy topic (no hash collisions) + 4 context + 1 intercept. */
   banditSemanticDims: 24,
-  banditTagDims: 8,
   /** Ridge regularization λ (A starts as λI). */
   lambda: 1.0,
   /** LinUCB exploration strength α. */

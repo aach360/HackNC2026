@@ -1,14 +1,19 @@
 import type { BanditState, PulseEvent } from "@/shared/types";
+import { TOPICS } from "@/shared/taxonomy";
 import { REC_CONFIG as C } from "./config";
-import { eventLabels, hashedLabelVector, normalize, project, projectionMatrix } from "./vectors";
+import { normalize, project, projectionMatrix } from "./vectors";
+
+/** One dedicated dimension per taxonomy topic — no hash collisions, fully interpretable. */
+const TOPIC_INDEX = new Map(TOPICS.map((t, i) => [t.id, i]));
+const TOPIC_DIMS = TOPICS.length;
 
 /**
- * Per-user LinUCB (Li et al., 2010) over a compact 37-dim feature vector.
+ * Per-user LinUCB (Li et al., 2010) over a compact feature vector.
  * We store ridge statistics A (= λI + Σxxᵀ) and b (= Σ r·x) and solve with a Cholesky
  * factorization each ranking pass — O(d³) with d = 37, numerically stable, no explicit inverse.
  * Output is a ranking score, not a calibrated probability.
  */
-export const BANDIT_DIMS = C.banditSemanticDims + C.banditTagDims + 4 + 1;
+export const BANDIT_DIMS = C.banditSemanticDims + TOPIC_DIMS + 4 + 1;
 
 let P: Float64Array | null = null;
 const proj = () => (P ??= projectionMatrix(C.banditSemanticDims, C.semanticDims, 0x5eed));
@@ -37,13 +42,17 @@ function contextFeatures(e: PulseEvent, now: Date): number[] {
   return [1 / (1 + hours / 48), nyDay === "Sat" || nyDay === "Sun" ? 1 : 0, !e.allDay && nyHour >= 17 ? 1 : 0, e.allDay ? 1 : 0];
 }
 
-/** x = [proj24(semantic) | 8 hashed tag buckets | 4 context | 1]. Semantic block is zeros when missing. Unit-scaled blocks. */
+/** x = [proj24(semantic) | one-hot taxonomy topics | 4 context | 1]. Semantic block is zeros when missing. */
 export function banditFeatures(e: PulseEvent, semantic: number[] | null | undefined, now: Date): number[] {
   const sem = semantic ? normalize(project(proj(), C.banditSemanticDims, semantic)) : null;
-  const tags = hashedLabelVector(eventLabels(e), C.banditTagDims);
+  const topics = new Array<number>(TOPIC_DIMS).fill(0);
+  for (const t of e.topics ?? []) {
+    const i = TOPIC_INDEX.get(t);
+    if (i !== undefined) topics[i] = 1;
+  }
   const x = [
     ...(sem ?? new Array<number>(C.banditSemanticDims).fill(0)),
-    ...(tags ?? new Array<number>(C.banditTagDims).fill(0)),
+    ...topics,
     ...contextFeatures(e, now).map((v) => v * 0.5),
     0.5,
   ];
