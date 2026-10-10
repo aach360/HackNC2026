@@ -44,7 +44,7 @@ function Discover() {
     <div className="space-y-3">
       {feed.origin === "demo" && (
         <div className="aero-panel rounded-2xl px-4 py-2 text-xs font-bold text-navy">
-          Showing demo events — live Heel Life events couldn't be loaded right now.
+          Showing demo events — none of the live calendars (Heel Life, UNC Calendar, Carrboro) could be loaded right now.
         </div>
       )}
       <Filters value={filters} onChange={setFilters} categories={categories} />
@@ -61,7 +61,7 @@ function Discover() {
           </StatePanel>
         ) : (
           <StatePanel icon={<Heart className="size-6" />} title="Nothing matches these filters">
-            <p>Heel Life rarely lists ticket prices, so few events are confirmed free.</p>
+            <p>Most calendars don't list prices, so only events marked free by their source count as confirmed free.</p>
             <AeroButton tone="pearl" className="mt-4" onClick={() => setFilters(DEFAULT_FILTERS)}>Clear filters</AeroButton>
           </StatePanel>
         )

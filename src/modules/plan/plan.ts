@@ -17,6 +17,7 @@ export function getPlan(items: PlanItem[]): PlanEntry[] {
     const overlapsWith = sorted
       .filter((o) => o.eventId !== item.eventId)
       .filter((o) => {
+        if (item.event.allDay || o.event.allDay) return false;
         const [os, oe] = span(o);
         return s === os || (s < oe && os < e);
       })
@@ -31,7 +32,7 @@ export function planNarration(items: PlanItem[]): string {
   const lines = getPlan(items).map((p) => {
     const e = p.event;
     const where = e.location ? ` at ${e.location}` : "";
-    return `${formatDayHeading(e.startsAt)}, ${formatTime(e.startsAt)}: ${e.title}${where}.`;
+    return `${formatDayHeading(e.startsAt)}, ${e.allDay ? "all day" : formatTime(e.startsAt)}: ${e.title}${where}.`;
   });
   return `Here is your PulseMatch plan. ${lines.join(" ")}`;
 }
