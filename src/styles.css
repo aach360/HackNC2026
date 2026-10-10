@@ -246,3 +246,20 @@
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   .bubble { display: none; }
 }
+
+/* Discover filter sidebar + Rameses peek */
+:root { --carolina: oklch(0.67 0.11 242); }
+@theme inline { --color-carolina: var(--carolina); }
+.filter-sidebar { transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 280ms ease-out; will-change: transform; }
+.filter-closed { transform: translateX(-100%); opacity: 0; }
+.filter-open { transform: translateX(0); opacity: 1; }
+.rameses-img { transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.rameses-down { transform: translateY(62%); }
+.rameses-up { transform: translateY(0) rotate(-6deg); }
+@media (prefers-reduced-motion: reduce) {
+  .filter-sidebar { transition: opacity 200ms linear; }
+  .filter-closed, .filter-open { transform: none; }
+  .filter-closed { pointer-events: none; }
+  .rameses-img { transition: opacity 200ms linear; }
+  .rameses-up { transform: none; }
+}

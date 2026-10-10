@@ -6,10 +6,10 @@
  */
 
 /** "heellife-json" is retained for old saved snapshots only; the default Heel Life transport is RSS. */
-export type EventSource = "heellife-json" | "heellife-rss" | "unc-calendar" | "carrboro" | "ticketmaster" | "demo" | "submission";
+export type EventSource = "heellife-json" | "heellife-rss" | "unc-calendar" | "carrboro" | "ticketmaster" | "ackland" | "morehead" | "unc-libraries" | "orange-county" | "demo" | "submission";
 
 /** Registry ID for a live source (Heel Life JSON/RSS are transports of one source). */
-export type SourceId = "heellife" | "unc-calendar" | "carrboro" | "ticketmaster";
+export type SourceId = "heellife" | "unc-calendar" | "carrboro" | "ticketmaster" | "ackland" | "morehead" | "unc-libraries" | "orange-county";
 
 export type EventStatus = "scheduled" | "cancelled" | "unknown";
 

@@ -10,6 +10,14 @@ export function sourceLabel(e: Pick<PulseEvent, "source">): string {
       return "UNC Calendar";
     case "carrboro":
       return "Carrboro calendar";
+    case "ackland":
+      return "Ackland Art Museum";
+    case "morehead":
+      return "Morehead Planetarium";
+    case "unc-libraries":
+      return "UNC Libraries calendar";
+    case "orange-county":
+      return "Orange County calendar";
     case "ticketmaster":
       return "Ticketmaster";
     default:
