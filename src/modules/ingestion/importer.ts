@@ -9,6 +9,8 @@ import { acklandAdapter, moreheadAdapter } from "./tribe";
 import { orangeCountyAdapter, uncLibrariesAdapter } from "./ics-feeds";
 import { dedupeKey } from "./store";
 import { createEnrichmentCache } from "./enrichment";
+import { withClassification } from "@/modules/recommendations/classify";
+import { TAXONOMY_VERSION } from "@/shared/taxonomy";
 
 /** Source registry. All run independently; one failing never erases the others. */
 export const ADAPTERS: SourceAdapter[] = [heelLifeAdapter, uncCalendarAdapter, carrboroAdapter, acklandAdapter, moreheadAdapter, uncLibrariesAdapter, orangeCountyAdapter, ticketmasterAdapter];
@@ -143,7 +145,11 @@ const enrichment = createEnrichmentCache();
 /** Cached read used by the app (per server instance; see README). Uses cached AI fields only — never waits on the model. */
 export async function getFeed(): Promise<EventFeed> {
   const f = await shared.getFeed();
-  return f.origin === "live" ? { ...f, events: enrichment.apply(f.events) } : f;
+  if (f.origin !== "live") return f;
+  // Deterministic taxonomy classification runs on every serve (cheap, no model);
+  // stale classifications (old taxonomy version) are recomputed automatically.
+  const classified = f.events.map((e) => (e.taxonomyVersion === TAXONOMY_VERSION ? e : withClassification(e)));
+  return { ...f, events: enrichment.apply(classified) };
 }
 
 /** Privileged: callers must authorize first. */
