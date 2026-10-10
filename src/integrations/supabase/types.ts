@@ -14,7 +14,139 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_alerts_sent: {
+        Row: {
+          event_id: string
+          member_id: string
+          sent_at: string
+        }
+        Insert: {
+          event_id: string
+          member_id: string
+          sent_at?: string
+        }
+        Update: {
+          event_id?: string
+          member_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_alerts_sent_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "club_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_members: {
+        Row: {
+          alerts_opt_in: boolean
+          club_id: string
+          device_token_hash: string | null
+          display_name: string
+          id: string
+          joined_at: string
+          phone: string | null
+        }
+        Insert: {
+          alerts_opt_in?: boolean
+          club_id: string
+          device_token_hash?: string | null
+          display_name: string
+          id?: string
+          joined_at?: string
+          phone?: string | null
+        }
+        Update: {
+          alerts_opt_in?: boolean
+          club_id?: string
+          device_token_hash?: string | null
+          display_name?: string
+          id?: string
+          joined_at?: string
+          phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      club_messages: {
+        Row: {
+          author_name: string
+          body: string
+          club_id: string
+          created_at: string
+          id: string
+          member_id: string | null
+          source: string
+        }
+        Insert: {
+          author_name: string
+          body: string
+          club_id: string
+          created_at?: string
+          id?: string
+          member_id?: string | null
+          source?: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          club_id?: string
+          created_at?: string
+          id?: string
+          member_id?: string | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_messages_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "club_messages_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "club_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clubs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          join_code: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          join_code: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          join_code?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
