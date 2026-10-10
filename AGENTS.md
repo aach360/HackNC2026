@@ -16,3 +16,5 @@
 - User state goes through `UserStateStorage` (localStorage today) so authenticated persistence can replace it without UI changes.
 - Provider keys (Gemini, ElevenLabs, admin token) are read only inside server function handlers; unconfigured integrations return an explicit "unconfigured" status, never fake success.
 - Visual styling uses the aero utilities in `src/styles.css` (aero-btn, aero-panel, aero-solid, bubble); components don't hardcode colors.
+- Club chats live in Lovable Cloud and are reached only through server functions using a hashed anonymous device token; tables have no public policies so members-only chats can't be read directly.
+- The Photon Spectrum iMessage agent runs as a separate long-lived process in `agent/` and calls `/api/public/agent/*` with a bearer token, because Spectrum's message stream can't run in edge workers.
