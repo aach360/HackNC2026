@@ -5,10 +5,12 @@ import { heelLifeAdapter, type SourceAdapter } from "./adapters";
 import { uncCalendarAdapter } from "./unc-calendar";
 import { carrboroAdapter } from "./carrboro";
 import { ticketmasterAdapter } from "./ticketmaster";
+import { acklandAdapter, moreheadAdapter } from "./tribe";
+import { orangeCountyAdapter, uncLibrariesAdapter } from "./ics-feeds";
 import { dedupeKey } from "./store";
 
 /** Source registry. All run independently; one failing never erases the others. */
-export const ADAPTERS: SourceAdapter[] = [heelLifeAdapter, uncCalendarAdapter, carrboroAdapter, ticketmasterAdapter];
+export const ADAPTERS: SourceAdapter[] = [heelLifeAdapter, uncCalendarAdapter, carrboroAdapter, acklandAdapter, moreheadAdapter, uncLibrariesAdapter, orangeCountyAdapter, ticketmasterAdapter];
 
 export const CACHE_TTL_MS = 15 * 60 * 1000;
 /** Last-known-good snapshots are served (marked stale) for at most this long after a failure. */
