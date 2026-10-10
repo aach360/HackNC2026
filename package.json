@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "eval:recs": "bun scripts/eval-recs.ts"
   },
   "overrides": {
     "rolldown": "1.2.1"
