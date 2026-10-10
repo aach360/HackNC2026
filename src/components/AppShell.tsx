@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bot, CalendarDays, CalendarRange, Heart, Sparkles, Users } from "lucide-react";
+import { Bot, CalendarDays, Heart, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import sky from "@/assets/sky-bg.jpg";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
@@ -9,7 +9,6 @@ const NAV = [
   { to: "/", label: "Discover", icon: Sparkles },
   { to: "/saved", label: "Saved", icon: Heart },
   { to: "/plan", label: "Plan", icon: CalendarDays },
-  { to: "/calendar", label: "Calendar", icon: CalendarRange },
   { to: "/clubs", label: "Clubs", icon: Users },
   { to: "/assistant", label: "Assistant", icon: Bot },
 ] as const;
