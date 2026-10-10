@@ -34,7 +34,7 @@ function pickDiverse(events: PulseEvent[], skip: Set<string>): PulseEvent[] {
   const out: PulseEvent[] = [];
   const pool = events.filter((e) => !skip.has(e.id));
   for (const e of pool) {
-    const k = (e.category ?? e.tags[0] ?? "other").toLowerCase();
+    const k = (e.tags[0] ?? e.source ?? "other").toLowerCase();
     if (!seen.has(k)) { seen.add(k); out.push(e); }
     if (out.length === COUNT) return out;
   }
