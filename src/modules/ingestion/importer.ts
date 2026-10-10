@@ -8,6 +8,7 @@ import { ticketmasterAdapter } from "./ticketmaster";
 import { acklandAdapter, moreheadAdapter } from "./tribe";
 import { orangeCountyAdapter, uncLibrariesAdapter } from "./ics-feeds";
 import { dedupeKey } from "./store";
+import { createEnrichmentCache } from "./enrichment";
 
 /** Source registry. All run independently; one failing never erases the others. */
 export const ADAPTERS: SourceAdapter[] = [heelLifeAdapter, uncCalendarAdapter, carrboroAdapter, acklandAdapter, moreheadAdapter, uncLibrariesAdapter, orangeCountyAdapter, ticketmasterAdapter];
@@ -136,15 +137,21 @@ export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { win
 }
 
 const shared = createImporter();
+/** In-memory AI enrichment cache (lost on restart; see enrichment.ts). */
+const enrichment = createEnrichmentCache();
 
-/** Cached read used by the app (per server instance; see README). */
-export function getFeed(): Promise<EventFeed> {
-  return shared.getFeed();
+/** Cached read used by the app (per server instance; see README). Uses cached AI fields only — never waits on the model. */
+export async function getFeed(): Promise<EventFeed> {
+  const f = await shared.getFeed();
+  return f.origin === "live" ? { ...f, events: enrichment.apply(f.events) } : f;
 }
 
 /** Privileged: callers must authorize first. */
 export async function forceImport() {
   await shared.refresh(true);
   const f = await shared.getFeed();
-  return { origin: f.origin, fetchedAt: f.fetchedAt, warnings: f.warnings, total: f.events.length, sources: f.sources };
+  // Bounded enrichment inside the request (no detached background work).
+  const { enrichWithGemini } = await import("./gemini");
+  const ai = f.origin === "live" ? await enrichment.run(f.events, enrichWithGemini) : null;
+  return { origin: f.origin, fetchedAt: f.fetchedAt, warnings: f.warnings, total: f.events.length, sources: f.sources, ai };
 }

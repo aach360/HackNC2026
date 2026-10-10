@@ -26,11 +26,11 @@ export async function enrichWithGemini(input: { title: string; description: stri
     `<event>\nTitle: ${input.title}\nDescription: ${(input.description ?? "").slice(0, 4000)}\n</event>`;
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
       {
         method: "POST",
         signal: AbortSignal.timeout(15000),
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: { responseMimeType: "application/json" },
@@ -40,10 +40,16 @@ export async function enrichWithGemini(input: { title: string; description: stri
     if (!res.ok) return { status: "error", message: `Gemini HTTP ${res.status}` };
     const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
     const text = body.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    const parsed = Enrichment.safeParse(JSON.parse(text));
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { status: "error", message: "Gemini output was not JSON" };
+    }
+    const parsed = Enrichment.safeParse(json);
     if (!parsed.success) return { status: "error", message: "Gemini output failed validation" };
     return { status: "ok", data: { ...parsed.data, tags: parsed.data.tags.map((t) => t.toLowerCase()) } };
   } catch (e) {
-    return { status: "error", message: (e as Error).message };
+    return { status: "error", message: (e as Error).name === "TimeoutError" ? "Gemini timeout" : "Gemini request failed" };
   }
 }
