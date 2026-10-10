@@ -8,9 +8,9 @@ import { z } from "zod";
 export const generatePlanAudio = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ text: z.string().min(1).max(4000) }).parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.ELEVENLABS_API_KEY;
+    const key = process.env["ELEVENLABS_API_KEY"];
     if (!key) return { status: "unconfigured" as const };
-    const voice = process.env.ELEVENLABS_VOICE_ID || "JBFqnCBsd6RMkjVDRZzb";
+    const voice = process.env["ELEVENLABS_VOICE_ID"] || "JBFqnCBsd6RMkjVDRZzb";
     try {
       const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {
         method: "POST",

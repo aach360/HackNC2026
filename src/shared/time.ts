@@ -12,13 +12,13 @@ export function nyDateKey(d: Date | string): string {
 }
 
 function addDays(key: string, n: number): string {
-  const [y, m, d] = key.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
   const t = new Date(Date.UTC(y, m - 1, d + n));
   return t.toISOString().slice(0, 10);
 }
 
 function weekday(key: string): number {
-  const [y, m, d] = key.split("-").map(Number);
+  const [y = 0, m = 1, d = 1] = key.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 

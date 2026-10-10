@@ -116,12 +116,12 @@ export const heelLifeJsonAdapter: SourceAdapter = {
 function tag(block: string, name: string): string | null {
   const m = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "i"));
   if (!m) return null;
-  return m[1].replace(/^<!\[CDATA\[|\]\]>$/g, "").trim();
+  return (m[1] ?? "").replace(/^<!\[CDATA\[|\]\]>$/g, "").trim();
 }
 
 function allTags(block: string, name: string): string[] {
   const re = new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "gi");
-  return Array.from(block.matchAll(re), (m) => m[1].replace(/^<!\[CDATA\[|\]\]>$/g, "").trim());
+  return Array.from(block.matchAll(re), (m) => (m[1] ?? "").replace(/^<!\[CDATA\[|\]\]>$/g, "").trim());
 }
 
 export function parseHeelLifeRss(xml: string, fetchedAt: string): PulseEvent[] {
@@ -151,7 +151,7 @@ export function parseHeelLifeRss(xml: string, fetchedAt: string): PulseEvent[] {
       endsAt: end ? new Date(end).toISOString() : null,
       timezone: "America/New_York",
       location: tag(item, "location") ? decodeEntities(tag(item, "location")!) : null,
-      organizer: hosts.length ? decodeEntities(hosts[hosts.length - 1]) : null,
+      organizer: hosts.length ? decodeEntities(hosts[hosts.length - 1] ?? "") : null,
       imageUrl: image ? decodeEntities(image) : null,
       categories: theme ? [themeToCategory(theme)!] : [],
       tags: Array.from(new Set(cats.slice(1).map(cleanTag).filter(Boolean))),

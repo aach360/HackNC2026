@@ -97,7 +97,7 @@ export function getRecommendations(input: {
       const alt = rest.findIndex((r) => r.event.categories[0] !== lastTwo[0]);
       if (alt > 0) idx = alt;
     }
-    out.push(rest.splice(idx, 1)[0]);
+    out.push(rest.splice(idx, 1)[0]!);
   }
   return out;
 }

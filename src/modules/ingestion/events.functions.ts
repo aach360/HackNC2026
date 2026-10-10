@@ -23,7 +23,7 @@ export const eventsQuery = queryOptions({
 export const refreshImport = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string().min(1).max(200) }).parse(d))
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_IMPORT_TOKEN;
+    const expected = process.env["ADMIN_IMPORT_TOKEN"];
     if (!expected) return { ok: false as const, error: "Admin import is not configured on this server." };
     if (data.token !== expected) return { ok: false as const, error: "Not authorized." };
     const { forceImport } = await import("./importer");

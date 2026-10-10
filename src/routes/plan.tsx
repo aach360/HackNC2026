@@ -77,7 +77,7 @@ function Plan() {
 
           {days.map((d) => (
             <section key={d.key}>
-              <h2 className="mb-2 text-lg font-bold text-navy drop-shadow-[0_1px_0_oklch(1_0_0/0.8)]">{formatDayHeading(d.items[0].event.startsAt)}</h2>
+              <h2 className="mb-2 text-lg font-bold text-navy drop-shadow-[0_1px_0_oklch(1_0_0/0.8)]">{formatDayHeading(d.items[0]!.event.startsAt)}</h2>
               <ol className="space-y-2">
                 {d.items.map(({ event: e, overlapsWith }) => (
                   <li key={e.id}>

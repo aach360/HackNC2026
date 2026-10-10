@@ -30,7 +30,7 @@ export function createMemoryRepository(): EventRepository {
         if (prev) {
           updated++;
           // Keep AI enrichment from earlier imports; source facts always win.
-          map.set(key, { ...e, aiSummary: e.aiSummary ?? prev.aiSummary, aiTags: e.aiTags ?? prev.aiTags });
+          map.set(key, { ...e, aiSummary: e.aiSummary ?? prev.aiSummary ?? null, aiTags: e.aiTags ?? prev.aiTags ?? [] });
         } else {
           inserted++;
           map.set(key, e);
