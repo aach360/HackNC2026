@@ -39,7 +39,6 @@ export function parseIcsFeed(text: string, cfg: IcsConfig, fetchedAt: string): {
       const summary = get("SUMMARY") ? htmlToText(unescapeIcs(get("SUMMARY")!.value)) ?? "" : "";
       const ds = get("DTSTART") ? parseIcsDate(get("DTSTART")!) : null; // never DTSTAMP
       if (get("RRULE")) rrules++;
-      cur = cur; // keep reference for closures below
       if (!uid || !summary || !ds) {
         skipped++;
         cur = null;
