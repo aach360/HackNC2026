@@ -1,5 +1,15 @@
 import type { EventFilters, PulseEvent, RankBreakdown, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
+import { benefitLabel, formatLabel, topicLabel } from "@/shared/taxonomy";
 import { REC_CONFIG as C } from "./config";
+
+/** Human label for an event label key ("topic:live-music" → "Live music"). */
+function labelFor(k: string): string {
+  const id = k.slice(k.indexOf(":") + 1);
+  if (k.startsWith("topic:")) return topicLabel(id);
+  if (k.startsWith("fmt:")) return formatLabel(id);
+  if (k.startsWith("ben:")) return benefitLabel(id);
+  return id;
+}
 import { banditFeatures, banditModel } from "./bandit";
 import { cosine, eventLabels, fnv, hashedLabelVector, meanVector } from "./vectors";
 
@@ -149,7 +159,7 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
       const c = profile.recentLabels.get(k) ?? 0;
       if (c > best) {
         best = c;
-        recentHit = k.slice(4);
+        recentHit = labelFor(k);
       }
     }
     const reasons = reasonsFor({ event, rel: 0, sem, fb, b }, profile, hoursAway, recentHit, affinityRecent > cosine(v, space.full) + 0.05);
