@@ -56,6 +56,9 @@ function Plan() {
   return (
     <div>
       <PageTitle title="Plan" subtitle="In time order. Travel time between venues isn't included." />
+      <Link to="/calendar" className="aero-btn aero-pearl inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold">
+        <CalendarDays className="size-4" /> Calendar view &amp; add to phone
+      </Link>
       {plan.length === 0 ? (
         <StatePanel icon={<CalendarDays className="size-6" />} title="Your plan is empty">
           <p>Add events from your saved list.</p>

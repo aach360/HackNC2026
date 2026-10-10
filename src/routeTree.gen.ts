@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as LabRouteImport } from './routes/lab'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
@@ -32,6 +34,16 @@ const AdminRoute = AdminRouteImport.update({
 const AssistantRoute = AssistantRouteImport.update({
   id: '/assistant',
   path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarRoute = CalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabRoute = LabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanRoute = PlanRouteImport.update({
@@ -69,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/calendar': typeof CalendarRoute
+  '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
@@ -80,6 +94,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/calendar': typeof CalendarRoute
+  '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
@@ -92,6 +108,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/assistant': typeof AssistantRoute
+  '/calendar': typeof CalendarRoute
+  '/lab': typeof LabRoute
   '/plan': typeof PlanRoute
   '/saved': typeof SavedRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
@@ -105,6 +123,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/calendar'
+    | '/lab'
     | '/plan'
     | '/saved'
     | '/clubs/$clubId'
@@ -116,6 +136,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/calendar'
+    | '/lab'
     | '/plan'
     | '/saved'
     | '/clubs/$clubId'
@@ -127,6 +149,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/assistant'
+    | '/calendar'
+    | '/lab'
     | '/plan'
     | '/saved'
     | '/clubs/$clubId'
@@ -139,6 +163,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AssistantRoute: typeof AssistantRoute
+  CalendarRoute: typeof CalendarRoute
+  LabRoute: typeof LabRoute
   PlanRoute: typeof PlanRoute
   SavedRoute: typeof SavedRoute
   ClubsClubIdRoute: typeof ClubsClubIdRoute
@@ -168,6 +194,20 @@ declare module '@tanstack/react-router' {
       path: '/assistant'
       fullPath: '/assistant'
       preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar': {
+      id: '/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab': {
+      id: '/lab'
+      path: '/lab'
+      fullPath: '/lab'
+      preLoaderRoute: typeof LabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan': {
@@ -219,6 +259,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AssistantRoute: AssistantRoute,
+  CalendarRoute: CalendarRoute,
+  LabRoute: LabRoute,
   PlanRoute: PlanRoute,
   SavedRoute: SavedRoute,
   ClubsClubIdRoute: ClubsClubIdRoute,

@@ -1,7 +1,8 @@
 import type { EventFilters, PulseEvent, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
 import { matchesDateFilter } from "@/shared/time";
+import { rankHybrid, type VectorMap } from "./engine";
 
-/** Transparent baseline ranker. Replace this module wholesale if you like — keep the signatures. */
+/** Public recommendation API. Hard filters live here; scoring is in engine.ts (hybrid) with the old ranker kept as baseline. */
 
 export const LIKE_WEIGHT = { cat: 1.0, tag: 0.6 };
 export const PASS_WEIGHT = { cat: -0.35, tag: -0.2 };
@@ -64,11 +65,8 @@ export function explain(e: PulseEvent, prefs: UserPreferences): string | null {
   return best ? `Because you liked ${keyLabel(best)}` : null;
 }
 
-/**
- * getRecommendations: filters first (hard constraints), excludes swiped,
- * scores by learned weights + soonness + jitter, then interleaves to keep variety.
- */
-export function getRecommendations(input: {
+/** Previous additive ranker, kept as the evaluation baseline. */
+export function baselineRecommendations(input: {
   events: PulseEvent[];
   swipes: Swipe[];
   prefs: UserPreferences;
@@ -83,12 +81,11 @@ export function getRecommendations(input: {
     let pref = 0;
     for (const k of keys) pref += input.prefs.weights[k] ?? 0;
     const hoursAway = Math.max(0, (new Date(event.startsAt).getTime() - now.getTime()) / 3600_000);
-    const soon = 1 / (1 + hoursAway / 48); // 0..1
+    const soon = 1 / (1 + hoursAway / 48);
     const score = pref + soon * 0.8 + jitter(event.id) * 0.6;
     return { event, score: Math.round(score * 100) / 100, reason: explain(event, input.prefs) };
   });
   scored.sort((a, b) => b.score - a.score);
-  // Variety: avoid 3 in a row of the same primary category.
   const out: RankedEvent[] = [];
   const rest = [...scored];
   while (rest.length) {
@@ -101,4 +98,22 @@ export function getRecommendations(input: {
     out.push(rest.splice(idx, 1)[0]!);
   }
   return out;
+}
+
+/**
+ * getRecommendations — same signature as before plus optional hybrid inputs.
+ * Hard filters → hybrid semantic + LinUCB score → MMR diversity (see engine.ts).
+ */
+export function getRecommendations(input: {
+  events: PulseEvent[];
+  swipes: Swipe[];
+  prefs: UserPreferences;
+  filters: EventFilters;
+  now?: Date;
+  vectors?: VectorMap;
+  planIds?: string[];
+  frozenId?: string | null;
+  history?: PulseEvent[];
+}): RankedEvent[] {
+  return rankHybrid({ ...input, applyFilters });
 }

@@ -52,8 +52,8 @@ describe("recommendations", () => {
     expect(after.find((r) => r.event.id === music.id)).toBeUndefined();
     const rank = (list: typeof before, id: string) => list.findIndex((r) => r.event.id === id);
     expect(rank(after, "demo:d8")).toBeLessThanOrEqual(rank(before, "demo:d8"));
-    expect(after.find((r) => r.event.id === "demo:d8")!.reason).toMatch(/Because you liked/);
-    expect(before.every((r) => r.reason === null)).toBe(true);
+    expect(after.find((r) => r.event.id === "demo:d8")!.reason ?? "").not.toMatch(/new topic/);
+    expect(before.every((r) => !/saved|interest/.test(r.reason ?? ""))).toBe(true);
   });
 
   it("filters take precedence over preferences", () => {

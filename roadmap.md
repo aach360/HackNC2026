@@ -12,3 +12,6 @@
 - [x] Discover: move filters into hover-reveal sidebar with Rameses mascot
 - [ ] Verify Photon texting — blocked: PHOTON_AGENT_TOKEN not yet saved; agent must be running on a laptop
 - [x] Rameses: real artwork, attached to sidebar footer, no overlap
+- [ ] Hybrid recommender: embeddings + LinUCB bandit + diversity rerank
+- [ ] Calendar view of plan/saved events + download .ics to phone
+- [x] Calendar month view (/calendar, linked from Plan) + .ics download for phones
