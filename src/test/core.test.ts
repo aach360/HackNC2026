@@ -24,8 +24,8 @@ describe("ingestion", () => {
     expect(r).toEqual({ inserted: 0, updated: 1 });
     const list = repo.listUpcoming(now);
     expect(list).toHaveLength(1);
-    expect(list[0].title).toBe("New title");
-    expect(list[0].sourceUrl).toBe("https://heellife.unc.edu/event/1");
+    expect(list[0]!.title).toBe("New title");
+    expect(list[0]!.sourceUrl).toBe("https://heellife.unc.edu/event/1");
   });
 
   it("excludes ended events", () => {
@@ -92,7 +92,7 @@ describe("persistence and plan", () => {
     const a = ev.find((e) => e.id === "demo:d1")!; // day 0, 19-21
     const b = ev.find((e) => e.id === "demo:d7")!; // day 0, 20-22
     const plan = getPlan([b, a].map((event) => ({ eventId: event.id, addedAt: "", event })));
-    expect(plan[0].eventId).toBe(a.id);
-    expect(plan[0].overlapsWith).toEqual([b.id]);
+    expect(plan[0]!.eventId).toBe(a.id);
+    expect(plan[0]!.overlapsWith).toEqual([b.id]);
   });
 });
