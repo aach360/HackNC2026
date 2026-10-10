@@ -1,0 +1,103 @@
+import type { EventFilters, PulseEvent, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
+import { matchesDateFilter } from "@/shared/time";
+
+/** Transparent baseline ranker. Replace this module wholesale if you like — keep the signatures. */
+
+export const LIKE_WEIGHT = { cat: 1.0, tag: 0.6 };
+export const PASS_WEIGHT = { cat: -0.35, tag: -0.2 };
+
+export const emptyPreferences = (): UserPreferences => ({ weights: {}, likeCounts: {}, remindersOptIn: false });
+
+export function featureKeys(e: PulseEvent): string[] {
+  return [
+    ...e.categories.map((c) => `cat:${c.toLowerCase()}`),
+    ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.toLowerCase()}`),
+  ];
+}
+
+export const keyLabel = (k: string) => k.slice(4);
+
+/** Pure: returns new preferences after a swipe. */
+export function applySwipe(prefs: UserPreferences, event: PulseEvent, dir: Swipe["direction"]): UserPreferences {
+  const weights = { ...prefs.weights };
+  const likeCounts = { ...prefs.likeCounts };
+  for (const k of new Set(featureKeys(event))) {
+    const kind = k.startsWith("cat:") ? "cat" : "tag";
+    const delta = dir === "like" ? LIKE_WEIGHT[kind] : PASS_WEIGHT[kind];
+    weights[k] = Math.round(((weights[k] ?? 0) + delta) * 100) / 100;
+    if (dir === "like") likeCounts[k] = (likeCounts[k] ?? 0) + 1;
+  }
+  return { ...prefs, weights, likeCounts };
+}
+
+/** Deterministic per-event jitter in [0,1) so the starting feed is varied but stable. */
+function jitter(id: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+  return ((h >>> 0) % 1000) / 1000;
+}
+
+export function isConfirmedFree(e: PulseEvent) {
+  return e.costAmount === 0;
+}
+
+export function applyFilters(events: PulseEvent[], f: EventFilters, now = new Date()): PulseEvent[] {
+  return events.filter(
+    (e) =>
+      matchesDateFilter(e, f.date, now) &&
+      (!f.category || e.categories.includes(f.category)) &&
+      (!f.confirmedFreeOnly || isConfirmedFree(e)),
+  );
+}
+
+export function explain(e: PulseEvent, prefs: UserPreferences): string | null {
+  let best: string | null = null;
+  let bestW = 0;
+  for (const k of featureKeys(e)) {
+    const w = prefs.weights[k] ?? 0;
+    if ((prefs.likeCounts[k] ?? 0) > 0 && w > bestW) {
+      best = k;
+      bestW = w;
+    }
+  }
+  return best ? `Because you liked ${keyLabel(best)}` : null;
+}
+
+/**
+ * getRecommendations: filters first (hard constraints), excludes swiped,
+ * scores by learned weights + soonness + jitter, then interleaves to keep variety.
+ */
+export function getRecommendations(input: {
+  events: PulseEvent[];
+  swipes: Swipe[];
+  prefs: UserPreferences;
+  filters: EventFilters;
+  now?: Date;
+}): RankedEvent[] {
+  const now = input.now ?? new Date();
+  const swiped = new Set(input.swipes.map((s) => s.eventId));
+  const pool = applyFilters(input.events, input.filters, now).filter((e) => !swiped.has(e.id));
+  const scored = pool.map((event) => {
+    const keys = new Set(featureKeys(event));
+    let pref = 0;
+    for (const k of keys) pref += input.prefs.weights[k] ?? 0;
+    const hoursAway = Math.max(0, (new Date(event.startsAt).getTime() - now.getTime()) / 3600_000);
+    const soon = 1 / (1 + hoursAway / 48); // 0..1
+    const score = pref + soon * 0.8 + jitter(event.id) * 0.6;
+    return { event, score: Math.round(score * 100) / 100, reason: explain(event, input.prefs) };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  // Variety: avoid 3 in a row of the same primary category.
+  const out: RankedEvent[] = [];
+  const rest = [...scored];
+  while (rest.length) {
+    const lastTwo = out.slice(-2).map((r) => r.event.categories[0]);
+    let idx = 0;
+    if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
+      const alt = rest.findIndex((r) => r.event.categories[0] !== lastTwo[0]);
+      if (alt > 0) idx = alt;
+    }
+    out.push(rest.splice(idx, 1)[0]!);
+  }
+  return out;
+}
