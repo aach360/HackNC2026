@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { DateFilter, EventFilters } from "@/shared/types";
 import { cn } from "@/lib/utils";
-// TODO(rameses.png): placeholder art — swap in the official cropped transparent PNG with the same filename.
-import rameses from "@/assets/rameses.png";
+// Tar Heel foot logo (transparent PNG).
+import rameses from "@/assets/tarheel-foot.png";
 
 const DATES: { v: DateFilter; l: string }[] = [
   { v: "any", l: "Anytime" },
