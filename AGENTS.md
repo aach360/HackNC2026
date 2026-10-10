@@ -20,3 +20,4 @@
 - The Photon Spectrum iMessage agent runs as a separate long-lived process in `agent/` and calls `/api/public/agent/*` with a bearer token, because Spectrum's message stream can't run in edge workers.
 - The Discover filters live in FilterSidebar (hover/tap-reveal from the left edge) so the swipe card keeps the full height; filter state stays in the Discover route.
 - AI enrichment runs only inside the admin refresh request (bounded count/concurrency/time) and feed reads apply cached results, because edge runtimes may kill detached background work.
+- Calendar export is client-side RFC 5545 in src/modules/plan/ics.ts from local plan/saved state; no server or subscription feed, because user state is device-local.

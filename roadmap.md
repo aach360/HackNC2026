@@ -14,3 +14,4 @@
 - [x] Rameses: real artwork, attached to sidebar footer, no overlap
 - [ ] Hybrid recommender: embeddings + LinUCB bandit + diversity rerank
 - [ ] Calendar view of plan/saved events + download .ics to phone
+- [x] Calendar month view (/calendar, linked from Plan) + .ics download for phones
