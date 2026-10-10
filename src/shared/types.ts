@@ -89,6 +89,31 @@ export interface UserPreferences {
   /** Count of LIKES per key — used only for honest "Because you liked…" explanations. */
   likeCounts: Record<string, number>;
   remindersOptIn: boolean;
+  /** Per-user LinUCB state (see recommendations/bandit.ts). Absent = cold start. */
+  bandit?: BanditState;
+}
+
+/** Ridge-regression sufficient statistics for the contextual bandit. A is d×d row-major. */
+export interface BanditState {
+  version: string;
+  d: number;
+  A: number[];
+  b: number[];
+  n: number;
+}
+
+/** Score contributions behind a recommendation (diagnostics + "Why this event?"). */
+export interface RankBreakdown {
+  mode: "semantic" | "tag-fallback";
+  semantic: number;
+  predicted: number;
+  exploration: number;
+  uncertainty: number;
+  time: number;
+  diversityPenalty: number;
+  reasons: string[];
+  /** Feature vector shown to the bandit; reused verbatim when the swipe arrives. */
+  features: number[];
 }
 
 export type DateFilter = "any" | "today" | "tomorrow" | "weekend" | "week";
@@ -134,6 +159,7 @@ export interface RankedEvent {
   score: number;
   /** Only present when backed by real like history. */
   reason: string | null;
+  breakdown?: RankBreakdown;
 }
 
 export const DISPLAY_TZ = "America/New_York";
