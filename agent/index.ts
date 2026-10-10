@@ -4,26 +4,27 @@
  *
  *   cd agent && bun install && bun run index.ts
  *
- * Env: PROJECT_ID, PROJECT_SECRET (from app.photon.codes, promo HACKWITHPHOTON),
+ * Env: SPECTRUM_PROJECT_ID, SPECTRUM_PROJECT_SECRET (from app.photon.codes, promo HACKWITHPHOTON),
  *      PULSEMATCH_URL (e.g. https://<your-site>.lovable.app), PHOTON_AGENT_TOKEN (same value as the website's secret).
  */
 // PulseMatch's Photon project — created via the HACKWITHPHOTON hackathon promo.
-const PROJECT_ID = process.env.PROJECT_ID ?? "440f4b28-11a2-46d8-b24a-5dc0d7f5452f";
+const PROJECT_ID = process.env.SPECTRUM_PROJECT_ID ?? process.env.PROJECT_ID ?? "440f4b28-11a2-46d8-b24a-5dc0d7f5452f";
+const PROJECT_SECRET = process.env.SPECTRUM_PROJECT_SECRET ?? process.env.PROJECT_SECRET;
 
 import { Spectrum } from "spectrum-ts";
 import { imessage } from "spectrum-ts/providers/imessage";
 
 const BASE = process.env.PULSEMATCH_URL?.replace(/\/$/, "");
 const TOKEN = process.env.PHOTON_AGENT_TOKEN;
-if (!BASE || !TOKEN || !process.env.PROJECT_SECRET) {
-  console.error("Missing env: PROJECT_SECRET, PULSEMATCH_URL, PHOTON_AGENT_TOKEN");
+if (!BASE || !TOKEN || !PROJECT_SECRET) {
+  console.error("Missing env: SPECTRUM_PROJECT_SECRET, PULSEMATCH_URL, PHOTON_AGENT_TOKEN (legacy PROJECT_SECRET is also accepted)");
   process.exit(1);
 }
 const headers = { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" };
  
 const app = await Spectrum({
   projectId: PROJECT_ID,
-  projectSecret: process.env.PROJECT_SECRET,
+  projectSecret: PROJECT_SECRET,
   providers: [imessage.config()],
 });
 

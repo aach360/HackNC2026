@@ -2,11 +2,13 @@
 
 Texts in, club chats out — one place for every club instead of scattered group chats.
 
-1. Sign up at https://app.photon.codes/dashboard (promo `HACKWITHPHOTON`) → get `PROJECT_SECRET`. Our project ID is `440f4b28-11a2-46d8-b24a-5dc0d7f5452f` (already set in `index.ts`).
+1. Sign up at https://app.photon.codes/dashboard (promo `HACKWITHPHOTON`) → get your project secret. Our project ID is `440f4b28-11a2-46d8-b24a-5dc0d7f5452f`.
 2. Add a phone number to your Photon account (avatar menu, top-right) — Spectrum can't enroll you on the project until you do.
-3. Set the website secret `PHOTON_AGENT_TOKEN`; use the same value here.
-4. `cd agent && bun install`
-5. `PROJECT_SECRET=… PULSEMATCH_URL=https://<site> PHOTON_AGENT_TOKEN=… bun run index.ts`
+3. In `agent/`, copy `.env.example` to `.env` if you don't already have one. Fill in `SPECTRUM_PROJECT_SECRET` and a long random `PHOTON_AGENT_TOKEN`; confirm `PULSEMATCH_URL` points to your website. `.env` is ignored by Git.
+4. Set the website's server secret `PHOTON_AGENT_TOKEN` to exactly the same value as in `agent/.env`.
+5. `cd agent && bun install && bun start`. Bun automatically loads `agent/.env` when run from this folder. Keep the process running to receive and send texts.
+
+The helper accepts `SPECTRUM_PROJECT_ID` and `SPECTRUM_PROJECT_SECRET`, with legacy `PROJECT_ID` and `PROJECT_SECRET` as fallbacks. The `SPECTRUM_` values take precedence. Never commit project secrets or agent tokens.
 
 Alternative: scaffold a fresh Spectrum project with `bun create spectrum-project@latest pulsematch --projectId 440f4b28-11a2-46d8-b24a-5dc0d7f5452f --providers imessage --yes` (writes a .env with credentials), then copy our `index.ts` logic into it.
 
