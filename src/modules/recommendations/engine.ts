@@ -78,15 +78,24 @@ function jitter(id: string) {
   return (fnv(id) % 1000) / 1000;
 }
 
-/** Same occurrence listed twice (e.g. two sources) → keep the first. Distinct start times are kept. */
+/** Series identity: same normalized title = same recurring event / cross-source listing. */
+export function seriesKey(e: Pick<PulseEvent, "title">): string {
+  return e.title.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+}
+
+/**
+ * One card per series: recurring sessions and cross-source copies collapse to the
+ * soonest occurrence, so the deck keeps surfacing new events. Other dates stay on the source page.
+ */
 function dedupeOccurrences(events: PulseEvent[]): PulseEvent[] {
-  const seen = new Set<string>();
-  return events.filter((e) => {
-    const k = `${e.title.trim().toLowerCase().replace(/\s+/g, " ")}|${e.startsAt}`;
-    if (seen.has(k)) return false;
-    seen.add(k);
-    return true;
-  });
+  const best = new Map<string, PulseEvent>();
+  for (const e of events) {
+    const k = seriesKey(e);
+    const prev = best.get(k);
+    if (!prev || e.startsAt < prev.startsAt) best.set(k, e);
+  }
+  const keep = new Set([...best.values()].map((e) => e.id));
+  return events.filter((e) => keep.has(e.id));
 }
 
 interface Scored {
@@ -123,8 +132,20 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
   for (const e of input.events) byId.set(e.id, e);
   const swiped = new Set(input.swipes.map((s) => s.eventId));
   const planned = new Set(input.planIds ?? []);
+  // Swiping or planning one occurrence of a series hides its other dates too.
+  const seenSeries = new Set<string>();
+  for (const s of input.swipes) {
+    const e = s.event ?? byId.get(s.eventId);
+    if (e) seenSeries.add(seriesKey(e));
+  }
+  for (const id of planned) {
+    const e = byId.get(id);
+    if (e) seenSeries.add(seriesKey(e));
+  }
   const pool = dedupeOccurrences(
-    input.applyFilters(input.events, input.filters, now).filter((e) => e.status !== "cancelled" && !swiped.has(e.id) && !planned.has(e.id)),
+    input
+      .applyFilters(input.events, input.filters, now)
+      .filter((e) => e.status !== "cancelled" && !swiped.has(e.id) && !planned.has(e.id) && !seenSeries.has(seriesKey(e))),
   );
 
   const profile = buildProfile(input.swipes, byId, vectors);
