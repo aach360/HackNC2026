@@ -10,8 +10,11 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { Toaster } from "@/components/ui/sonner";
 import { AppShell } from "@/components/AppShell";
 import { UserStateProvider } from "@/modules/recommendations/UserStateProvider";
+import { AssistantChatProvider } from "@/modules/assistant/AssistantChatProvider";
+import { RamesesChat } from "@/modules/assistant/RamesesChat";
 import { AuthProvider } from "@/modules/auth/AuthProvider";
 import { CloudSync } from "@/modules/auth/CloudSync";
 import appCss from "../styles.css?url";
@@ -129,9 +132,13 @@ function RootComponent() {
       <AuthProvider>
         <UserStateProvider>
           <CloudSync />
-          <AppShell>
-            <Outlet />
-          </AppShell>
+          <AssistantChatProvider>
+            <AppShell>
+              <Outlet />
+            </AppShell>
+            <RamesesChat />
+            <Toaster />
+          </AssistantChatProvider>
         </UserStateProvider>
       </AuthProvider>
     </QueryClientProvider>

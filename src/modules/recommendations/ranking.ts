@@ -1,30 +1,47 @@
 import type { EventFilters, PulseEvent, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
+import { benefitLabel, formatLabel, topicLabel } from "@/shared/taxonomy";
 import { matchesDateFilter } from "@/shared/time";
 import { rankHybrid, type VectorMap } from "./engine";
 
 /** Public recommendation API. Hard filters live here; scoring is in engine.ts (hybrid) with the old ranker kept as baseline. */
 
-export const LIKE_WEIGHT = { cat: 1.0, tag: 0.6 };
-export const PASS_WEIGHT = { cat: -0.35, tag: -0.2 };
+/**
+ * Weight per key kind. Classified taxonomy topics carry the strongest signal;
+ * vague source categories ("Community Building", "Thoughtful Learning") are
+ * deliberately weak so they can't dominate recommendations.
+ */
+export const LIKE_WEIGHT = { topic: 1.0, ben: 0.8, fmt: 0.5, cat: 0.25, tag: 0.4 };
+export const PASS_WEIGHT = { topic: -0.35, ben: -0.15, fmt: -0.15, cat: -0.1, tag: -0.15 };
 
 export const emptyPreferences = (): UserPreferences => ({ weights: {}, likeCounts: {}, remindersOptIn: false });
+
+const keyKind = (k: string) => k.slice(0, k.indexOf(":")) as keyof typeof LIKE_WEIGHT;
 
 export function featureKeys(e: PulseEvent): string[] {
   // Unique: a tag present in both source and AI tags counts once.
   return [...new Set([
+    ...(e.topics ?? []).map((t) => `topic:${t}`),
+    ...(e.formats ?? []).map((f) => `fmt:${f}`),
+    ...(e.benefits ?? []).map((b) => `ben:${b}`),
     ...e.categories.map((c) => `cat:${c.toLowerCase()}`),
     ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.trim().toLowerCase()}`),
   ])];
 }
 
-export const keyLabel = (k: string) => k.slice(4);
+export function keyLabel(k: string) {
+  const id = k.slice(k.indexOf(":") + 1);
+  if (k.startsWith("topic:")) return topicLabel(id);
+  if (k.startsWith("fmt:")) return formatLabel(id);
+  if (k.startsWith("ben:")) return benefitLabel(id);
+  return id;
+}
 
 /** Pure: returns new preferences after a swipe. */
 export function applySwipe(prefs: UserPreferences, event: PulseEvent, dir: Swipe["direction"]): UserPreferences {
   const weights = { ...prefs.weights };
   const likeCounts = { ...prefs.likeCounts };
   for (const k of new Set(featureKeys(event))) {
-    const kind = k.startsWith("cat:") ? "cat" : "tag";
+    const kind = keyKind(k);
     const delta = dir === "like" ? LIKE_WEIGHT[kind] : PASS_WEIGHT[kind];
     weights[k] = Math.round(((weights[k] ?? 0) + delta) * 100) / 100;
     if (dir === "like") likeCounts[k] = (likeCounts[k] ?? 0) + 1;

@@ -1,6 +1,7 @@
 import { CalendarDays, MapPin, Users, Info } from "lucide-react";
 import type { RankedEvent } from "@/shared/types";
 import { formatEventDate } from "@/shared/time";
+import { topicLabel } from "@/shared/taxonomy";
 import { Chip } from "@/components/aero";
 import { EventImage } from "./EventImage";
 
@@ -24,6 +25,7 @@ export function EventCard({ ranked, onDetails }: { ranked: RankedEvent; onDetail
           {e.organizer && <li className="flex items-center gap-2"><Users className="size-4 shrink-0 text-primary" /><span className="truncate">{e.organizer}</span></li>}
         </ul>
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {(e.topics ?? []).slice(0, 3).map((t) => <Chip key={t} className="border-primary/40 bg-primary/10">{topicLabel(t)}</Chip>)}
           {e.categories.map((c) => <Chip key={c}>{c}</Chip>)}
           {e.tags.includes("free food") && <Chip className="border-grass/40 bg-grass/15">free food</Chip>}
           {e.costText && <Chip className="border-grass/40 bg-grass/15">{e.costText}</Chip>}

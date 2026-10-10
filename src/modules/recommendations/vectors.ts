@@ -73,9 +73,15 @@ export function fnv(s: string): number {
   return h >>> 0;
 }
 
-/** Category/tag labels used for the non-semantic fallback (deduped, lowercase). */
-export function eventLabels(e: Pick<PulseEvent, "categories" | "tags" | "aiTags">): string[] {
-  return [...new Set([...e.categories.map((c) => `cat:${c.trim().toLowerCase()}`), ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.trim().toLowerCase()}`)])].filter((k) => k.length > 4);
+/** Labels used for the non-semantic fallback (deduped). Taxonomy topics lead; raw source labels follow. */
+export function eventLabels(e: Pick<PulseEvent, "categories" | "tags" | "aiTags" | "topics" | "formats" | "benefits">): string[] {
+  return [...new Set([
+    ...(e.topics ?? []).map((t) => `topic:${t}`),
+    ...(e.formats ?? []).map((f) => `fmt:${f}`),
+    ...(e.benefits ?? []).map((b) => `ben:${b}`),
+    ...e.categories.map((c) => `cat:${c.trim().toLowerCase()}`),
+    ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.trim().toLowerCase()}`),
+  ])].filter((k) => k.length > 4);
 }
 
 /** Signed feature hashing of labels into `dims` buckets — the "tag-fallback" representation. */

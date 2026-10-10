@@ -262,6 +262,31 @@
 .rameses-img { transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 .rameses-down { transform: translateY(62%); }
 .rameses-up { transform: translateY(0) rotate(-6deg); }
+
+/* Corner Rameses chat widget */
+.rameses-bubble, .rameses-panel { animation: rameses-pop 220ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes rameses-pop {
+  from { transform: translateY(0.5rem); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.typing-dot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--carolina);
+  animation: typing-bounce 1s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-0.3rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rameses-bubble, .rameses-panel { animation: none; }
+  .typing-dot { animation: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .filter-sidebar, .rameses-peek, .rameses-img { transition: none; }
   .filter-body { transition: opacity 200ms linear; }
