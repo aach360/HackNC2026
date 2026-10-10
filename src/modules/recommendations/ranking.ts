@@ -9,10 +9,11 @@ export const PASS_WEIGHT = { cat: -0.35, tag: -0.2 };
 export const emptyPreferences = (): UserPreferences => ({ weights: {}, likeCounts: {}, remindersOptIn: false });
 
 export function featureKeys(e: PulseEvent): string[] {
-  return [
+  // Unique: a tag present in both source and AI tags counts once.
+  return [...new Set([
     ...e.categories.map((c) => `cat:${c.toLowerCase()}`),
-    ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.toLowerCase()}`),
-  ];
+    ...[...e.tags, ...(e.aiTags ?? [])].map((t) => `tag:${t.trim().toLowerCase()}`),
+  ])];
 }
 
 export const keyLabel = (k: string) => k.slice(4);
