@@ -16,3 +16,8 @@ Behaviour: 30-day window; 15-min cache per server instance with coalesced refres
 Contract changes (`src/shared/types.ts`): new `EventSource` values, optional `sourceOccurrenceId`, `allDay`, `hosts`, `sourceStatus` on `PulseEvent`; `EventFeed.origin` is now `"live" | "demo"` plus `sources` and `cancelledIds`. All-day events keep NY midnight → next midnight (exclusive). `hasEnded` no longer invents a 1 h duration: with no end time an event is hidden only after its start day.
 
 Known limits: Localist start-date queries can miss multi-day events that began before today; Carrboro RRULEs aren't expanded (reported as a warning); cross-source duplicates are not merged; listing counts are not unique-event counts.
+
+## Additional sources (Oct 2026)
+Implemented: Ackland and Morehead (shared The Events Calendar adapter, `tribe.ts`), UNC Libraries and Orange County Countywide + Animal Services (`ics-feeds.ts`; Orange County dedupes across category feeds by `orange-county:UID`).
+Researched only, not built: Duke and NC State (need a regional/distance preference first), Cat's Cradle (listing pagination not validated). Disabled pending publisher access: NC Botanical Garden, UNC Music, Chapel Hill Public Library.
+Cross-source duplicates (e.g. Ackland vs UNC Calendar) are not merged yet.

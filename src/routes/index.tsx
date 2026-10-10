@@ -6,7 +6,7 @@ import { eventsQuery } from "@/modules/ingestion/events.functions";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
 import { getRecommendations } from "@/modules/recommendations/ranking";
 import { SwipeDeck } from "@/modules/discovery/SwipeDeck";
-import { Filters } from "@/modules/discovery/Filters";
+import { FilterSidebar } from "@/modules/discovery/FilterSidebar";
 import { EventDetail } from "@/modules/discovery/EventDetail";
 import { StatePanel } from "@/components/StatePanel";
 import { AeroButton } from "@/components/aero";
@@ -44,10 +44,10 @@ function Discover() {
     <div className="space-y-3">
       {feed.origin === "demo" && (
         <div className="aero-panel rounded-2xl px-4 py-2 text-xs font-bold text-navy">
-          Showing demo events — none of the live calendars (Heel Life, UNC Calendar, Carrboro) could be loaded right now.
+          Showing demo events — none of the live calendars could be loaded right now.
         </div>
       )}
-      <Filters value={filters} onChange={setFilters} categories={categories} />
+      <FilterSidebar value={filters} onChange={setFilters} onClear={() => setFilters(DEFAULT_FILTERS)} categories={categories} />
 
       {!hydrated ? (
         <StatePanel icon={<Waves className="size-6 animate-pulse" />} title="Loading events…" />
