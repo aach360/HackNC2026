@@ -168,7 +168,7 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
     }
     const reasons = reasonsFor({ event, rel: 0, sem, fb, b }, profile, hoursAway, recentHit, affinityRecent > cosine(v, space.full) + 0.05);
     const interestHits = (event.topics ?? []).filter((t) => priorInterests.has(t)).length;
-    if (!reasons.length && interestHits > 0 && profile.likes === 0) reasons.push("Matches the interests you picked");
+    if (interestHits > 0 && profile.likes === 0) reasons.unshift("Matches the interests you picked");
     const rel = b.semantic + b.predicted + b.exploration + b.time + W.interest * priorShare * Math.min(1, interestHits) + W.jitter * jitter(event.id);
     return { event, rel, sem, fb, b: { ...b, reasons } };
   });

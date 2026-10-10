@@ -84,13 +84,17 @@ export function classifyEvent(e: Pick<PulseEvent, "title" | "description" | "cat
   const formats = matchAll(text, FORMATS);
   const benefits = matchAll(text, BENEFITS);
 
-  // Normalize source/AI tags into canonical topics when they name one exactly
-  // (e.g. an AI tag "neuroscience" or a source tag "Chess"). Evidence = the tag itself.
+  // Normalize source/AI tags into canonical topics only when the tag is also visible in
+  // the event's own text — a tag the listing never mentions (e.g. "basketball" on a
+  // department meeting) is rejected as unsupported.
   for (const raw of [...e.tags, ...(e.aiTags ?? [])]) {
     const id = canonicalTopic(raw);
     if (id && !topics.ids.includes(id)) {
-      topics.ids.push(id);
-      topics.evidence[id] = raw.trim();
+      const ev = findEvidence(text, raw.trim());
+      if (ev && isSupported(text, ev)) {
+        topics.ids.push(id);
+        topics.evidence[id] = ev;
+      }
     }
   }
 
