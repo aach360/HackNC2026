@@ -47,6 +47,8 @@ function blend(full: number[] | null, recent: number[] | null): number[] | null 
 }
 
 export function buildProfile(swipes: Swipe[], byId: Map<string, PulseEvent>, vectors: VectorMap): Profile {
+  // Swipe snapshots let us learn from events that have left the live feed.
+  for (const s of swipes) if (s.event && !byId.has(s.eventId)) byId.set(s.eventId, s.event);
   const likes = swipes.filter((s) => s.direction === "like").map((s) => byId.get(s.eventId)).filter((e): e is PulseEvent => !!e);
   const passes = swipes.filter((s) => s.direction === "pass").map((s) => byId.get(s.eventId)).filter((e): e is PulseEvent => !!e);
   const recent = likes.slice(-C.recentLikes);

@@ -59,7 +59,8 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
           const bandit = first ? updateBandit(ensureBandit(s.prefs.bandit), x, dir === "like" ? 1 : 0) : ensureBandit(s.prefs.bandit);
           return {
             ...s,
-            swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now }],
+            // Snapshot the event so the recommender can keep learning from it after it leaves the feed.
+            swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now, event }],
             prefs: { ...applySwipe(s.prefs, event, dir), bandit },
             saved:
               dir === "like" && !s.saved.some((x) => x.eventId === event.id)
