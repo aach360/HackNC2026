@@ -20,3 +20,6 @@
 - [x] Optional sign-in (Google + email) with cloud-saved state and 5-card onboarding
 - [ ] Rameses corner chat widget on Discover (shared assistant logic, event save chips)
 - [ ] Verify real Google/email sign-in end to end
+- [x] Rameses corner chat widget (shared conversation with Assistant tab, save chips, Escape/a11y)
+- [x] Verify sign-in: email sign-up was disabled in backend — enabled; Google already on; test signup works
+- [ ] Recommendation quality: shared versioned interest taxonomy (topic/format/benefits/constraints), evidence-grounded classification, onboarding expansion
