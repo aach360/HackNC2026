@@ -22,7 +22,9 @@ interface Ctx {
   replaceState: (s: UserState) => void;
 }
 
-const UserStateContext = createContext<Ctx | null>(null);
+// Keep one context identity across hot reloads; a re-created context orphans consumers from the mounted provider.
+const g = globalThis as { __pulseUserStateCtx?: React.Context<Ctx | null> };
+const UserStateContext = (g.__pulseUserStateCtx ??= createContext<Ctx | null>(null));
 
 export function UserStateProvider({ children, storage }: { children: ReactNode; storage?: UserStateStorage }) {
   const store = useRef<UserStateStorage | null>(storage ?? null);
