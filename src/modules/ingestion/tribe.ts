@@ -147,7 +147,7 @@ export function tribeAdapter(cfg: TribeConfig): SourceAdapter {
           break;
         }
         // Only follow pagination that stays on the configured host + API path.
-        if (next.protocol !== "https:" || next.host !== base.host || next.pathname !== base.pathname) throw new Error(`${cfg.id}: unexpected pagination link`);
+        if (next.protocol !== "https:" || next.host !== base.host || next.pathname.replace(/\/$/, "") !== base.pathname.replace(/\/$/, "")) throw new Error(`${cfg.id}: unexpected pagination link`);
         url = next.toString();
         await sleep(500);
       }
