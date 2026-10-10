@@ -13,3 +13,4 @@
 - [ ] Verify Photon texting — blocked: PHOTON_AGENT_TOKEN not yet saved; agent must be running on a laptop
 - [x] Rameses: real artwork, attached to sidebar footer, no overlap
 - [ ] Hybrid recommender: embeddings + LinUCB bandit + diversity rerank
+- [ ] Calendar view of plan/saved events + download .ics to phone
