@@ -25,6 +25,8 @@ export interface EnrichStats { status: "ok" | "unconfigured" | "error"; attempte
 
 export function createEnrichmentCache() {
   const cache = new Map<string, Entry>();
+  /** Rotating cursor so bounded runs eventually cover every event, not just the first batch. */
+  let cursor = 0;
 
   /** Merge cached AI fields. Never touches source fields; AI tags already in source tags are dropped. */
   function apply(events: PulseEvent[]): PulseEvent[] {
@@ -39,7 +41,13 @@ export function createEnrichmentCache() {
   async function run(events: PulseEvent[], enrich: EnrichFn, opts: { max?: number; concurrency?: number; deadlineMs?: number } = {}): Promise<EnrichStats> {
     const real = events.filter((e) => !e.isDemo && e.status !== "cancelled");
     const cached = real.filter((e) => cache.get(e.id)?.hash === contentHash(e)).length;
-    const todo = real.filter((e) => cache.get(e.id)?.hash !== contentHash(e)).slice(0, opts.max ?? ENRICH_MAX_PER_RUN);
+    const missing = real.filter((e) => cache.get(e.id)?.hash !== contentHash(e));
+    // Rotate the starting point each run: with a bounded batch size, always taking the
+    // first N would starve everything after position N forever.
+    const start = missing.length ? cursor % missing.length : 0;
+    const rotated = [...missing.slice(start), ...missing.slice(0, start)];
+    const todo = rotated.slice(0, opts.max ?? ENRICH_MAX_PER_RUN);
+    cursor = start + todo.length;
     const deadline = Date.now() + (opts.deadlineMs ?? ENRICH_DEADLINE_MS);
     const stats: EnrichStats = { status: "ok", attempted: 0, enriched: 0, cached, failed: 0, error: null };
     let i = 0;
