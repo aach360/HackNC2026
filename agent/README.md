@@ -13,4 +13,4 @@ Alternative: scaffold a fresh Spectrum project with `bun create spectrum-project
 Commands people can text: `join CODE Name`, `ask what's on tonight`, `alerts on|off`, `CODE message`, `help`.
 Anything else posts to the sender's most recent club. Website messages are mirrored back every ~5s.
 
-Note: the Spectrum message field names used in `index.ts` (`sender.id`, `text`, `space.send`) should be checked against docs.photon.codes once you have access.
+The Spectrum API used here is verified against `spectrum-ts@12.10.1`: `app.messages` yields `[space, message]`, text arrives as `message.content = { type: "text", text }` (or `{ type: "markdown", markdown }`), replies go through `message.reply(string)` / `space.send(string)`, and the sender phone is `message.sender.id`.
