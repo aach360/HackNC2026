@@ -18,3 +18,5 @@
 - [x] Poster/club photo scan (/scan) via Gemini vision
 - [x] Swap Rameses mascot for Tar Heel foot logo in filter sidebar
 - [x] Optional sign-in (Google + email) with cloud-saved state and 5-card onboarding
+- [ ] Rameses corner chat widget on Discover (shared assistant logic, event save chips)
+- [ ] Verify real Google/email sign-in end to end

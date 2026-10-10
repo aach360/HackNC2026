@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Bot, ExternalLink, Send, MessageCircle } from "lucide-react";
 import { eventsQuery } from "@/modules/ingestion/events.functions";
-import { askAssistant, type AssistantAnswer } from "@/modules/assistant/assistant";
+import { useAssistantChat } from "@/modules/assistant/AssistantChatProvider";
 import { photonStatus } from "@/modules/assistant/photon";
 import { AeroButton, OrbIcon, PageTitle, Panel } from "@/components/aero";
 import { formatEventDate } from "@/shared/time";
@@ -26,10 +26,11 @@ const SUGGESTIONS = ["What's happening tomorrow?", "Find free events this weeken
 function Assistant() {
   const { data: feed } = useSuspenseQuery(eventsQuery);
   const [q, setQ] = useState("");
-  const [log, setLog] = useState<{ q: string; a: AssistantAnswer }[]>([]);
+  // Shared with the corner Rameses widget — same conversation everywhere.
+  const { log, ask: askShared } = useAssistantChat();
   const ask = (question: string) => {
     if (!question.trim()) return;
-    setLog((l) => [...l, { q: question, a: askAssistant(question, feed.events) }]);
+    askShared(question, feed.events);
     setQ("");
   };
 

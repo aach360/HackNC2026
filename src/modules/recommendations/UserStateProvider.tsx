@@ -11,6 +11,8 @@ interface Ctx {
   recordSwipe: (event: PulseEvent, dir: SwipeDirection, features?: number[]) => void;
   undoLast: () => void;
   removeSaved: (eventId: string) => void;
+  /** Save an event without a swipe (e.g. from the assistant chat). No bandit reward. */
+  saveEvent: (event: PulseEvent) => void;
   togglePlan: (event: PulseEvent) => void;
   setRemindersOptIn: (v: boolean) => void;
   reset: () => void;
@@ -69,6 +71,12 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
         const prev = history.current.pop();
         if (prev) setState(prev);
       },
+      saveEvent: (event) =>
+        update((s) =>
+          s.saved.some((x) => x.eventId === event.id)
+            ? s
+            : { ...s, saved: [...s.saved, { eventId: event.id, savedAt: new Date().toISOString(), event }] },
+        ),
       removeSaved: (id) =>
         update((s) => ({ ...s, saved: s.saved.filter((x) => x.eventId !== id), plan: s.plan.filter((x) => x.eventId !== id) })),
       togglePlan: (event) =>
