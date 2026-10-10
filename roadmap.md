@@ -10,3 +10,5 @@
 
 - [x] Add Ackland, Morehead, UNC Libraries, Orange County event sources
 - [x] Discover: move filters into hover-reveal sidebar with Rameses mascot
+- [ ] Verify Photon texting — blocked: PHOTON_AGENT_TOKEN not yet saved; agent must be running on a laptop
+- [x] Rameses: real artwork, attached to sidebar footer, no overlap
