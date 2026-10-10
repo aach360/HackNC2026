@@ -33,7 +33,10 @@ const spaces = new Map<string, any>();
 async function inbound() {
   for await (const [space, message] of app.messages) {
     const from: string = (message as any).sender?.id ?? (message as any).from ?? "";
-    const text: string = (message as any).text ?? (message as any).content ?? "";
+    // Spectrum delivers text as { type: "text", text } (or { type: "markdown", markdown }).
+    const c: any = (message as any).content;
+    const text: string =
+      typeof c === "string" ? c : c?.type === "markdown" ? c.markdown ?? "" : c?.text ?? "";
     if (!from || !text) continue;
     spaces.set(from, space);
     await space.responding(async () => {
