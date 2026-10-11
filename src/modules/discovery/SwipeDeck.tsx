@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Heart, X, Undo2 } from "lucide-react";
 import type { PulseEvent, RankedEvent, SwipeDirection } from "@/shared/types";
 import { OrbButton } from "@/components/aero";
@@ -16,12 +16,17 @@ export function SwipeDeck({
   onUndo,
   canUndo,
   onDetails,
+  returning,
+  onReturned,
 }: {
   ranked: RankedEvent[];
   onSwipe: (e: PulseEvent, d: SwipeDirection) => void;
   onUndo: () => void;
   canUndo: boolean;
   onDetails: (e: PulseEvent) => void;
+  /** Card restored by undo: slides back in from the side it left. */
+  returning?: { id: string; dir: SwipeDirection } | null;
+  onReturned?: () => void;
 }) {
   const top = ranked[0];
   const next = ranked[1];
@@ -29,6 +34,19 @@ export function SwipeDeck({
   const [dragging, setDragging] = useState(false);
   const [leaving, setLeaving] = useState<SwipeDirection | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
+  const [entering, setEntering] = useState(false);
+
+  // Undo: place the restored card off-screen on the side it left, then animate it back to centre.
+  useLayoutEffect(() => {
+    if (!returning || !top || top.event.id !== returning.id) return;
+    onReturned?.();
+    setLeaving(null);
+    if (prefersReducedMotion()) { setDx(0); return; }
+    setEntering(true);
+    setDx(returning.dir === "like" ? 700 : -700);
+    const r = requestAnimationFrame(() => requestAnimationFrame(() => { setEntering(false); setDx(0); }));
+    return () => cancelAnimationFrame(r);
+  }, [returning, top, onReturned]);
 
   const commit = useCallback(
     (dir: SwipeDirection) => {
@@ -82,7 +100,7 @@ export function SwipeDeck({
           className="animate-pop absolute inset-0 touch-pan-y cursor-grab active:cursor-grabbing"
           style={{
             transform: `translateX(${x}px) rotate(${rot}deg)`,
-            transition: dragging ? "none" : "transform 260ms cubic-bezier(.2,.8,.3,1)",
+            transition: dragging || entering ? "none" : "transform 260ms cubic-bezier(.2,.8,.3,1)",
           }}
           onPointerDown={(e) => {
             start.current = { x: e.clientX, y: e.clientY };
