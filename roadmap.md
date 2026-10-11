@@ -25,5 +25,5 @@
 - [ ] Recommendation quality: shared versioned interest taxonomy (topic/format/benefits/constraints), evidence-grounded classification, onboarding expansion
 - [x] Recommendation quality + onboarding brief: shared taxonomy (30 topics/10 formats/4 benefits), content-grounded classification with evidence, tag rejection when unsupported, taxonomy-dimension bandit (v2 features), cold-start interest prior, rotating AI-enrichment coverage, 4-step onboarding (intent/interests/background/cards), CloudSync audit (failed reads never overwrite, stale-save guard, visible save toasts, sign-out restores device state), 59 tests green, eval rerun
 
-- [ ] Exploration cards ("Something new to try", ~15%, diagnostics, tests)
+- [x] Exploration cards ("Something new to try", ~15%, diagnostics, tests)
 - [ ] Twice-weekly refresh (Mon/Thu 4am ET) + Discover today-or-future only (brief: PulseMatch_-_twice-weekly_refresh)
