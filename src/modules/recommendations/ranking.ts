@@ -1,3 +1,4 @@
+import { hasEnded } from "@/shared/time";
 import type { EventFilters, PulseEvent, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
 import { benefitLabel, formatLabel, topicLabel } from "@/shared/taxonomy";
 import { matchesDateFilter } from "@/shared/time";
@@ -63,6 +64,7 @@ export function isConfirmedFree(e: PulseEvent) {
 export function applyFilters(events: PulseEvent[], f: EventFilters, now = new Date()): PulseEvent[] {
   return events.filter(
     (e) =>
+      !hasEnded(e, now) &&
       matchesDateFilter(e, f.date, now) &&
       (!f.category || e.categories.includes(f.category)) &&
       (!f.confirmedFreeOnly || isConfirmedFree(e)),
