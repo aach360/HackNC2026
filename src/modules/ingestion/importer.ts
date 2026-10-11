@@ -1,6 +1,6 @@
 import type { EventFeed, PulseEvent, SourceId, SourceStatus } from "@/shared/types";
 import { buildDemoEvents } from "@/fixtures/demo-events";
-import { hasEnded } from "@/shared/time";
+import { isEligibleForDiscover } from "@/shared/time";
 import { heelLifeAdapter, type SourceAdapter } from "./adapters";
 import { uncCalendarAdapter } from "./unc-calendar";
 import { carrboroAdapter } from "./carrboro";
@@ -11,14 +11,21 @@ import { dedupeKey } from "./store";
 import { createEnrichmentCache } from "./enrichment";
 import { withClassification } from "@/modules/recommendations/classify";
 import { TAXONOMY_VERSION } from "@/shared/taxonomy";
+import { loadSnapshots, saveSnapshot } from "./snapshot-store";
 
 /** Source registry. All run independently; one failing never erases the others. */
 export const ADAPTERS: SourceAdapter[] = [heelLifeAdapter, uncCalendarAdapter, carrboroAdapter, acklandAdapter, moreheadAdapter, uncLibrariesAdapter, orangeCountyAdapter, ticketmasterAdapter];
 
-export const CACHE_TTL_MS = 15 * 60 * 1000;
-/** Last-known-good snapshots are served (marked stale) for at most this long after a failure. */
-export const STALE_MAX_MS = 6 * 60 * 60 * 1000;
-export const WINDOW_DAYS = 30;
+/**
+ * Upstream ingestion runs ONLY on the twice-weekly schedule (or a privileged manual
+ * refresh) — never on ordinary Discover reads. The 15-minute figure is now purely an
+ * app-side response cache TTL for reads of persisted snapshots.
+ */
+export const RESPONSE_CACHE_TTL_MS = 15 * 60 * 1000;
+/** Snapshots older than this are excluded from Discover until the source refreshes. */
+export const SNAPSHOT_MAX_AGE_MS = 8 * 24 * 60 * 60 * 1000;
+/** Fetch horizon: today through the next 60 days (upper boundary exclusive). */
+export const WINDOW_DAYS = 60;
 
 interface Snapshot {
   events: PulseEvent[];
@@ -32,6 +39,7 @@ interface SourceState {
   lastStatus: SourceStatus["status"] | null;
   lastError: string | null;
   lastAttemptAt: string | null;
+  lastSuccessAt: string | null;
   warnings: string[];
 }
 
@@ -40,10 +48,30 @@ export interface Importer {
   refresh(force: boolean, now?: Date): Promise<void>;
 }
 
-export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { windowDays?: number } = {}): Importer {
-  const states = new Map<SourceId, SourceState>(adapters.map((a) => [a.id, { good: null, lastStatus: null, lastError: null, lastAttemptAt: null, warnings: [] }]));
-  let lastRefreshAt = 0;
+export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { windowDays?: number; persist?: boolean } = {}): Importer {
+  const states = new Map<SourceId, SourceState>(adapters.map((a) => [a.id, { good: null, lastStatus: null, lastError: null, lastAttemptAt: null, lastSuccessAt: null, warnings: [] }]));
+  const persist = opts.persist ?? true;
+  let loaded = false;
   let inFlight: Promise<void> | null = null;
+
+  /** One-time bootstrap from durable storage. Never fetches publishers. */
+  async function load() {
+    if (loaded || !persist) return;
+    loaded = true;
+    const rows = await loadSnapshots();
+    if (!rows) return;
+    for (const r of rows) {
+      const st = states.get(r.source);
+      if (!st) continue;
+      st.lastStatus = r.status;
+      st.lastError = r.error;
+      st.lastAttemptAt = r.lastAttemptAt;
+      st.lastSuccessAt = r.lastSuccessAt;
+      if (r.fetchedAt && r.status === "ok") {
+        st.good = { events: r.events, fetchedAt: r.fetchedAt, complete: r.complete, skipped: r.skipped };
+      }
+    }
+  }
 
   async function runOne(a: SourceAdapter, now: Date) {
     const st = states.get(a.id)!;
@@ -58,23 +86,39 @@ export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { win
         // Dedupe within the source by canonical occurrence identity.
         const byId = new Map<string, PulseEvent>();
         for (const e of r.events) byId.set(dedupeKey(e), e);
+        // Publish only after the source refresh completes; a failed later page
+        // (complete=false) still replaced atomically as one snapshot, never per-page.
         st.good = { events: [...byId.values()], fetchedAt, complete: r.complete, skipped: r.skipped };
-      } else st.good = null;
+        st.lastSuccessAt = fetchedAt;
+      }
+      // On failure keep the last complete snapshot (st.good untouched).
     } catch (err) {
       st.lastStatus = "error";
       st.lastError = (err as Error).message.slice(0, 200);
       st.warnings = [];
       console.error(`[ingestion] ${a.id} failed:`, st.lastError);
     }
+    if (persist) {
+      await saveSnapshot({
+        source: a.id,
+        events: st.good?.events ?? [],
+        fetchedAt: st.good?.fetchedAt ?? null,
+        lastAttemptAt: st.lastAttemptAt,
+        lastSuccessAt: st.lastSuccessAt,
+        complete: st.good?.complete ?? false,
+        skipped: st.good?.skipped ?? 0,
+        status: st.lastStatus ?? "error",
+        error: st.lastError,
+      });
+    }
   }
 
   function refresh(force: boolean, now = new Date()): Promise<void> {
-    if (!force && lastRefreshAt && now.getTime() - lastRefreshAt < CACHE_TTL_MS) return Promise.resolve();
+    // Ordinary reads never trigger upstream fetches; only force (scheduled/manual) does.
+    if (!force) return load();
     if (inFlight) return inFlight; // coalesce concurrent refreshes
     inFlight = Promise.all(adapters.map((a) => runOne(a, now)))
-      .then(() => {
-        lastRefreshAt = now.getTime();
-      })
+      .then(() => undefined)
       .finally(() => {
         inFlight = null;
       });
@@ -92,8 +136,10 @@ export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { win
     for (const a of adapters) {
       const st = states.get(a.id)!;
       const snap = st.good;
-      const stale = st.lastStatus === "error" && !!snap;
-      const usable = !!snap && (!stale || now.getTime() - Date.parse(snap.fetchedAt) < STALE_MAX_MS);
+      const failed = st.lastStatus === "error";
+      const age = snap ? now.getTime() - Date.parse(snap.fetchedAt) : Infinity;
+      const tooOld = age >= SNAPSHOT_MAX_AGE_MS;
+      const usable = !!snap && !tooOld;
       let count = 0;
       if (usable && snap) {
         anyUsable = true;
@@ -102,7 +148,7 @@ export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { win
             cancelled.add(e.id);
             continue;
           }
-          if (hasEnded(e, now)) continue; // expiry rechecked at serve time
+          if (!isEligibleForDiscover(e, now)) continue; // eligibility rechecked at serve time
           events.set(e.id, e);
           count++;
         }
@@ -113,17 +159,19 @@ export function createImporter(adapters: SourceAdapter[] = ADAPTERS, opts: { win
         fetchedAt: usable && snap ? snap.fetchedAt : null,
         eventCount: count,
         complete: usable && snap ? snap.complete : false,
-        stale: stale && usable,
+        stale: failed && usable,
         skipped: snap?.skipped ?? 0,
-        error: st.lastError,
+        error: tooOld && snap ? `Snapshot older than 8 days; excluded until the next refresh.` : st.lastError,
       });
       warnings.push(...st.warnings);
-      if (st.lastStatus === "error") warnings.push(stale && usable ? `${a.id}: latest refresh failed; showing data from ${snap!.fetchedAt}.` : `${a.id}: unavailable.`);
+      if (tooOld && snap) warnings.push(`${a.id}: listings are over 8 days old and hidden until the next refresh.`);
+      else if (failed) warnings.push(usable ? `${a.id}: latest refresh failed; showing data from ${snap!.fetchedAt}.` : `${a.id}: unavailable.`);
     }
 
     if (anyUsable) {
       const list = [...events.values()].sort((x, y) => x.startsAt.localeCompare(y.startsAt));
-      return { events: list, origin: "live", fetchedAt: new Date(lastRefreshAt || now.getTime()).toISOString(), warnings, sources, cancelledIds: [...cancelled] };
+      const freshest = [...states.values()].map((s) => s.good?.fetchedAt).filter(Boolean).sort().pop()!;
+      return { events: list, origin: "live", fetchedAt: freshest, warnings, sources, cancelledIds: [...cancelled] };
     }
     return {
       events: buildDemoEvents(),
@@ -142,7 +190,7 @@ const shared = createImporter();
 /** In-memory AI enrichment cache (lost on restart; see enrichment.ts). */
 const enrichment = createEnrichmentCache();
 
-/** Cached read used by the app (per server instance; see README). Uses cached AI fields only — never waits on the model. */
+/** Cached read used by the app. Reads persisted snapshots only — never fetches publishers. */
 export async function getFeed(): Promise<EventFeed> {
   const f = await shared.getFeed();
   if (f.origin !== "live") return f;
@@ -152,7 +200,7 @@ export async function getFeed(): Promise<EventFeed> {
   return { ...f, events: enrichment.apply(classified) };
 }
 
-/** Privileged: callers must authorize first. */
+/** Privileged: callers must authorize first. Fetches publishers and publishes snapshots. */
 export async function forceImport() {
   await shared.refresh(true);
   const f = await shared.getFeed();

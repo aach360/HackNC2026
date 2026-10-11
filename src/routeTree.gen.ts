@@ -23,6 +23,7 @@ import { Route as ClubsIndexRouteImport } from './routes/clubs.index'
 import { Route as ClubsClubIdRouteImport } from './routes/clubs.$clubId'
 import { Route as ApiPublicAgentInboundRouteImport } from './routes/api/public/agent/inbound'
 import { Route as ApiPublicAgentOutboxRouteImport } from './routes/api/public/agent/outbox'
+import { Route as ApiPublicHooksRefreshRouteImport } from './routes/api/public/hooks/refresh'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,6 +95,11 @@ const ApiPublicAgentOutboxRoute = ApiPublicAgentOutboxRouteImport.update({
   path: '/api/public/agent/outbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksRefreshRoute = ApiPublicHooksRefreshRouteImport.update({
+  id: '/api/public/hooks/refresh',
+  path: '/api/public/hooks/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/clubs/': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
   '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
+  '/api/public/hooks/refresh': typeof ApiPublicHooksRefreshRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/clubs': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
   '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
+  '/api/public/hooks/refresh': typeof ApiPublicHooksRefreshRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/clubs/': typeof ClubsIndexRoute
   '/api/public/agent/inbound': typeof ApiPublicAgentInboundRoute
   '/api/public/agent/outbox': typeof ApiPublicAgentOutboxRoute
+  '/api/public/hooks/refresh': typeof ApiPublicHooksRefreshRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/api/public/agent/inbound'
     | '/api/public/agent/outbox'
+    | '/api/public/hooks/refresh'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/clubs'
     | '/api/public/agent/inbound'
     | '/api/public/agent/outbox'
+    | '/api/public/hooks/refresh'
   id:
     | '__root__'
     | '/'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/clubs/'
     | '/api/public/agent/inbound'
     | '/api/public/agent/outbox'
+    | '/api/public/hooks/refresh'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   ClubsIndexRoute: typeof ClubsIndexRoute
   ApiPublicAgentInboundRoute: typeof ApiPublicAgentInboundRoute
   ApiPublicAgentOutboxRoute: typeof ApiPublicAgentOutboxRoute
+  ApiPublicHooksRefreshRoute: typeof ApiPublicHooksRefreshRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAgentOutboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/refresh': {
+      id: '/api/public/hooks/refresh'
+      path: '/api/public/hooks/refresh'
+      fullPath: '/api/public/hooks/refresh'
+      preLoaderRoute: typeof ApiPublicHooksRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -330,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClubsIndexRoute: ClubsIndexRoute,
   ApiPublicAgentInboundRoute: ApiPublicAgentInboundRoute,
   ApiPublicAgentOutboxRoute: ApiPublicAgentOutboxRoute,
+  ApiPublicHooksRefreshRoute: ApiPublicHooksRefreshRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

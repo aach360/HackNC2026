@@ -147,6 +147,45 @@ export type Database = {
         }
         Relationships: []
       }
+      event_snapshots: {
+        Row: {
+          complete: boolean
+          error: string | null
+          events: Json
+          fetched_at: string | null
+          last_attempt_at: string | null
+          last_success_at: string | null
+          skipped: number
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          complete?: boolean
+          error?: string | null
+          events?: Json
+          fetched_at?: string | null
+          last_attempt_at?: string | null
+          last_success_at?: string | null
+          skipped?: number
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          complete?: boolean
+          error?: string | null
+          events?: Json
+          fetched_at?: string | null
+          last_attempt_at?: string | null
+          last_success_at?: string | null
+          skipped?: number
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -165,6 +204,24 @@ export type Database = {
           display_name?: string | null
           id?: string
           onboarded_at?: string | null
+        }
+        Relationships: []
+      }
+      refresh_runs: {
+        Row: {
+          ran_at: string
+          result: Json | null
+          slot_key: string
+        }
+        Insert: {
+          ran_at?: string
+          result?: Json | null
+          slot_key: string
+        }
+        Update: {
+          ran_at?: string
+          result?: Json | null
+          slot_key?: string
         }
         Relationships: []
       }
