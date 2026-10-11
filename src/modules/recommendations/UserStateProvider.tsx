@@ -8,7 +8,7 @@ interface Ctx {
   state: UserState;
   hydrated: boolean;
   /** recordSwipe(event, direction, features?): like also saves the event. `features` = the vector used when the card was shown. */
-  recordSwipe: (event: PulseEvent, dir: SwipeDirection, features?: number[]) => void;
+  recordSwipe: (event: PulseEvent, dir: SwipeDirection, features?: number[], exploratory?: boolean) => void;
   undoLast: () => void;
   removeSaved: (eventId: string) => void;
   /** Save an event without a swipe (e.g. from the assistant chat). No bandit reward. */
@@ -53,7 +53,7 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
     () => ({
       state,
       hydrated,
-      recordSwipe: (event, dir, features) =>
+      recordSwipe: (event, dir, features, exploratory) =>
         update((s) => {
           const now = new Date().toISOString();
           // One explicit swipe = one bandit reward. The auto-save of a like is not a second reward,
@@ -64,7 +64,7 @@ export function UserStateProvider({ children, storage }: { children: ReactNode; 
           return {
             ...s,
             // Snapshot the event so the recommender can keep learning from it after it leaves the feed.
-            swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now, event }],
+            swipes: [...s.swipes.filter((x) => x.eventId !== event.id), { eventId: event.id, direction: dir, at: now, event, ...(exploratory ? { exploratory: true } : {}) }],
             prefs: { ...applySwipe(s.prefs, event, dir), bandit },
             saved:
               dir === "like" && !s.saved.some((x) => x.eventId === event.id)

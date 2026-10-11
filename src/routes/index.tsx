@@ -86,7 +86,7 @@ function Discover() {
           </StatePanel>
         )
       ) : (
-        <SwipeDeck ranked={ranked} onSwipe={(e, d) => recordSwipe(e, d, ranked.find((r) => r.event.id === e.id)?.breakdown?.features)} onUndo={undo} canUndo={state.swipes.length > 0} onDetails={setDetail} returning={returning} onReturned={clearReturning} />
+        <SwipeDeck ranked={ranked} onSwipe={(e, d) => { const b = ranked.find((r) => r.event.id === e.id)?.breakdown; recordSwipe(e, d, b?.features, b?.exploratory); }} onUndo={undo} canUndo={state.swipes.length > 0} onDetails={setDetail} returning={returning} onReturned={clearReturning} />
       )}
 
       <EventDetail event={detail} onClose={() => setDetail(null)} />
