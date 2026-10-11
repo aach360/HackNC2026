@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { eventVectorsQuery } from "@/modules/recommendations/embeddings.functions";
 import { Heart, Sparkles, Waves } from "lucide-react";
@@ -58,6 +58,7 @@ function Discover() {
     }
     undoLast();
   };
+  const clearReturning = useCallback(() => setReturning(null), []);
 
   return (
     <div className="space-y-3">
@@ -76,7 +77,7 @@ function Discover() {
         state.swipes.length > 0 && filters === DEFAULT_FILTERS ? (
           <StatePanel tone="grass" icon={<Sparkles className="size-6" />} title="You've seen everything!">
             <p>You swiped through every upcoming event. Check your saved list or come back later.</p>
-            <AeroButton className="mt-4" onClick={undoLast}>Undo last swipe</AeroButton>
+            <AeroButton className="mt-4" onClick={undo}>Undo last swipe</AeroButton>
           </StatePanel>
         ) : (
           <StatePanel icon={<Heart className="size-6" />} title="Nothing matches these filters">
@@ -85,7 +86,7 @@ function Discover() {
           </StatePanel>
         )
       ) : (
-        <SwipeDeck ranked={ranked} onSwipe={(e, d) => recordSwipe(e, d, ranked.find((r) => r.event.id === e.id)?.breakdown?.features)} onUndo={undoLast} canUndo={state.swipes.length > 0} onDetails={setDetail} />
+        <SwipeDeck ranked={ranked} onSwipe={(e, d) => recordSwipe(e, d, ranked.find((r) => r.event.id === e.id)?.breakdown?.features)} onUndo={undo} canUndo={state.swipes.length > 0} onDetails={setDetail} returning={returning} onReturned={clearReturning} />
       )}
 
       <EventDetail event={detail} onClose={() => setDetail(null)} />
