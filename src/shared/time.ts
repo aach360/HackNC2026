@@ -115,3 +115,21 @@ export function hasEnded(e: Pick<PulseEvent, "startsAt" | "endsAt">, now = new D
   if (e.endsAt) return new Date(e.endsAt).getTime() <= now.getTime();
   return nyDateKey(e.startsAt) < nyDateKey(now);
 }
+
+/**
+ * Discover start-date rule: the occurrence's start date in America/New_York must be
+ * today or later. An event that started yesterday stays excluded even if it continues
+ * today. An invalid start is ineligible (never substituted with import time).
+ */
+export function startsTodayOrFuture(e: Pick<PulseEvent, "startsAt">, now = new Date()): boolean {
+  const t = new Date(e.startsAt).getTime();
+  if (!Number.isFinite(t)) return false;
+  return nyDateKey(e.startsAt) >= nyDateKey(now);
+}
+
+/** Full current-time eligibility shared by Cards and Map (before user filters). */
+export function isEligibleForDiscover(e: Pick<PulseEvent, "startsAt" | "endsAt" | "status">, now = new Date()): boolean {
+  if (e.status === "cancelled") return false;
+  if (!startsTodayOrFuture(e, now)) return false;
+  return !hasEnded(e, now);
+}
