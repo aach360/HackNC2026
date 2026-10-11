@@ -83,19 +83,36 @@ export function seriesKey(e: Pick<PulseEvent, "title">): string {
   return e.title.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
+const DATE_WORDS = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b|\b(mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)[a-z]*\b|\b\d+(st|nd|rd|th|am|pm)?\b/g;
+
 /**
- * One card per series: recurring sessions and cross-source copies collapse to the
- * soonest occurrence, so the deck keeps surfacing new events. Other dates stay on the source page.
+ * All identity keys of an event: title (with dates/numbers stripped) and description
+ * fingerprint. Two listings sharing any key are treated as the same card.
  */
-function dedupeOccurrences(events: PulseEvent[]): PulseEvent[] {
-  const best = new Map<string, PulseEvent>();
-  for (const e of events) {
-    const k = seriesKey(e);
-    const prev = best.get(k);
-    if (!prev || e.startsAt < prev.startsAt) best.set(k, e);
+export function contentKeys(e: Pick<PulseEvent, "title" | "description">): string[] {
+  const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const keys = [`s:${seriesKey(e)}`];
+  const t = norm(e.title).replace(DATE_WORDS, " ").replace(/\s+/g, " ").trim();
+  if (t.length >= 4) keys.push(`t:${t}`);
+  const d = norm(e.description ?? "").slice(0, 200);
+  if (d.length >= 60) keys.push(`d:${d}`);
+  return keys;
+}
+
+/**
+ * One card per series: recurring sessions, cross-source copies and same-content listings
+ * collapse to the soonest occurrence, so the deck keeps surfacing new events.
+ */
+function dedupeOccurrences(events: PulseEvent[], seen: Set<string>): PulseEvent[] {
+  const out: PulseEvent[] = [];
+  const taken = new Set(seen);
+  for (const e of [...events].sort((a, b) => a.startsAt.localeCompare(b.startsAt))) {
+    const ks = contentKeys(e);
+    if (ks.some((k) => taken.has(k))) continue;
+    ks.forEach((k) => taken.add(k));
+    out.push(e);
   }
-  const keep = new Set([...best.values()].map((e) => e.id));
-  return events.filter((e) => keep.has(e.id));
+  return out;
 }
 
 interface Scored {
@@ -132,20 +149,21 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
   for (const e of input.events) byId.set(e.id, e);
   const swiped = new Set(input.swipes.map((s) => s.eventId));
   const planned = new Set(input.planIds ?? []);
-  // Swiping or planning one occurrence of a series hides its other dates too.
+  // Swiping or planning one occurrence hides its other dates and same-content copies too.
   const seenSeries = new Set<string>();
   for (const s of input.swipes) {
     const e = s.event ?? byId.get(s.eventId);
-    if (e) seenSeries.add(seriesKey(e));
+    if (e) contentKeys(e).forEach((k) => seenSeries.add(k));
   }
   for (const id of planned) {
     const e = byId.get(id);
-    if (e) seenSeries.add(seriesKey(e));
+    if (e) contentKeys(e).forEach((k) => seenSeries.add(k));
   }
   const pool = dedupeOccurrences(
     input
       .applyFilters(input.events, input.filters, now)
-      .filter((e) => e.status !== "cancelled" && !swiped.has(e.id) && !planned.has(e.id) && !seenSeries.has(seriesKey(e))),
+      .filter((e) => e.status !== "cancelled" && !swiped.has(e.id) && !planned.has(e.id)),
+    seenSeries,
   );
 
   const profile = buildProfile(input.swipes, byId, vectors);
