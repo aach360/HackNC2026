@@ -28,3 +28,4 @@
 - [x] Exploration cards ("Something new to try", ~15%, diagnostics, tests)
 - [ ] Twice-weekly refresh (Mon/Thu 4am ET) + Discover today-or-future only (brief: PulseMatch_-_twice-weekly_refresh)
 - [ ] Visual + motion redesign (brief: Give_PulseMatch_a_substantial_visual)
+- [ ] UNC event map in Discover (brief: PulseMatch_-_UNC_event_map_implementation_brief)
