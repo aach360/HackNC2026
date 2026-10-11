@@ -112,7 +112,7 @@ export function SwipeDeck({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative h-[min(calc(100dvh_-_250px),620px)] min-h-[400px] w-full max-w-md" aria-live="polite">
+      <div className="relative h-[min(calc(100dvh_-_360px),620px)] min-h-[360px] md:h-[min(calc(100dvh_-_240px),620px)] w-full max-w-md" aria-live="polite">
         {/* Abstract backplates only — never a real event that may be replaced. */}
         <div aria-hidden className="backplate absolute inset-x-6 bottom-[-14px] top-6 rounded-[2rem]" />
         <div aria-hidden className="backplate absolute inset-x-3 bottom-[-7px] top-3 rounded-[2rem]" />

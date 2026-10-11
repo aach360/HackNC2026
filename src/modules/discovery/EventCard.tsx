@@ -35,7 +35,7 @@ function dateTab(e: PulseEvent) {
 export function EventCard({ ranked, onDetails }: { ranked: RankedEvent; onDetails: () => void }) {
   const e = ranked.event;
   const tab = dateTab(e);
-  const when = formatEventDate(e).replace(/^[A-Za-z]{3},?\s+[A-Za-z]{3}\s+\d+,?\s*/, "") || formatEventDate(e);
+  const when = formatEventDate(e).replace(/^[A-Za-z]{3},?\s+[A-Za-z]{3}\s+\d+,?\s*(·\s*)?/, "") || formatEventDate(e);
   return (
     <article className="postcard flex h-full flex-col overflow-hidden rounded-[2rem]">
       <div className="relative min-h-0 flex-1">
