@@ -77,6 +77,8 @@ export interface Swipe {
   at: string;
   /** Snapshot kept so the recommender can learn from events after they leave the live feed. */
   event?: PulseEvent;
+  /** True when the card was shown as an exploratory pick ("Something new to try"). */
+  exploratory?: boolean;
 }
 
 export interface SavedEvent {
@@ -132,6 +134,8 @@ export interface RankBreakdown {
   uncertainty: number;
   time: number;
   diversityPenalty: number;
+  /** Chosen by the exploration slot policy; its uncertainty bonus is then not added to the score again. */
+  exploratory?: boolean;
   reasons: string[];
   /** Feature vector shown to the bandit; reused verbatim when the swipe arrives. */
   features: number[];

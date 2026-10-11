@@ -29,4 +29,10 @@ export const REC_CONFIG = {
   /** Explanation thresholds on score contributions. */
   explainSemanticMin: 0.12,
   soonHours: 24,
+  /**
+   * Exploration slot policy (initial heuristic, not tuned): ~rate of displayed cards are
+   * "Something new to try" picks, never two in a row. Topics with >= suppressAfterPasses
+   * exploratory passes (and no likes) stop being explored; one pass is only a small penalty.
+   */
+  exploration: { rate: 0.15, suppressAfterPasses: 2, passPenalty: 0.15, adjacentBonus: 0.1, maxSeenForNew: 1 },
 } as const;
