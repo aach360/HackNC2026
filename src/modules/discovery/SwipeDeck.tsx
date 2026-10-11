@@ -39,13 +39,12 @@ export function SwipeDeck({
   // Undo: place the restored card off-screen on the side it left, then animate it back to centre.
   useLayoutEffect(() => {
     if (!returning || !top || top.event.id !== returning.id) return;
-    onReturned?.();
     setLeaving(null);
-    if (prefersReducedMotion()) { setDx(0); return; }
+    if (prefersReducedMotion()) { setDx(0); onReturned?.(); return; }
     setEntering(true);
     setDx(returning.dir === "like" ? 700 : -700);
-    const r = requestAnimationFrame(() => requestAnimationFrame(() => { setEntering(false); setDx(0); }));
-    return () => cancelAnimationFrame(r);
+    // Two frames so the off-screen position paints before transitioning back; clear `returning` only after.
+    requestAnimationFrame(() => requestAnimationFrame(() => { setEntering(false); setDx(0); onReturned?.(); }));
   }, [returning, top, onReturned]);
 
   const commit = useCallback(
