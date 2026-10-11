@@ -48,6 +48,16 @@ function Discover() {
     return r;
   }, [feed.events, state.swipes, state.prefs, filters, vec?.vectors, planIds]);
   const filteredTotal = ranked.length;
+  // Undo: pin the undone card back on top and let the deck slide it in from where it left.
+  const [returning, setReturning] = useState<{ id: string; dir: "like" | "pass" } | null>(null);
+  const undo = () => {
+    const last = state.swipes[state.swipes.length - 1];
+    if (last) {
+      frozen.current = last.eventId;
+      setReturning({ id: last.eventId, dir: last.direction });
+    }
+    undoLast();
+  };
 
   return (
     <div className="space-y-3">
