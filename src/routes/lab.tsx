@@ -47,6 +47,8 @@ function Lab() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
   const likes = state.swipes.filter((s) => s.direction === "like").length;
+  const exp = state.swipes.filter((s) => s.exploratory);
+  const expLikes = exp.filter((s) => s.direction === "like").length;
   const semCount = Object.keys(vec?.vectors ?? {}).length;
 
   return (
@@ -68,12 +70,17 @@ function Lab() {
           <p className="font-bold text-navy">Strongest learned interests</p>
           <p>{interests.length ? interests.map(([k, w]) => `${keyLabel(k)} (${w})`).join(" · ") : "None yet — swipe right on a few events."}</p>
         </div>
+        <div className="sm:col-span-2">
+          <p className="font-bold text-navy">Exploration ("Something new to try", ~{Math.round(REC_CONFIG.exploration.rate * 100)}% of cards)</p>
+          <p>{exp.length ? `${exp.length} exploratory cards swiped: ${expLikes} liked, ${exp.length - expLikes} passed (like rate ${Math.round((expLikes / exp.length) * 100)}% vs ${state.swipes.length - exp.length ? Math.round(((likes - expLikes) / (state.swipes.length - exp.length)) * 100) : 0}% for regular cards).` : "No exploratory cards swiped yet."}</p>
+          <p className="text-xs text-muted-foreground">Raw counts only — too little data to say whether exploration improves engagement or retention.</p>
+        </div>
       </Panel>
       <Panel className="overflow-x-auto p-3">
         <table className="w-full text-left text-xs">
           <thead className="text-muted-foreground">
             <tr>
-              <th className="p-1">#</th><th className="p-1">Event</th><th className="p-1">Vector</th><th className="p-1">Semantic</th><th className="p-1">Predicted</th><th className="p-1">Explore (σ)</th><th className="p-1">Time</th><th className="p-1">MMR −</th><th className="p-1">Score</th><th className="p-1">Reasons</th>
+              <th className="p-1">#</th><th className="p-1">Event</th><th className="p-1">Vector</th><th className="p-1">Semantic</th><th className="p-1">Predicted</th><th className="p-1">Explore (σ)</th><th className="p-1">Time</th><th className="p-1">MMR −</th><th className="p-1">Score</th><th className="p-1">Explore slot</th><th className="p-1">Reasons</th>
             </tr>
           </thead>
           <tbody>
@@ -90,6 +97,7 @@ function Lab() {
                   <td className="p-1">{f(b.time)}</td>
                   <td className="p-1">{b.diversityPenalty.toFixed(3)}</td>
                   <td className="p-1 font-bold">{r.score.toFixed(3)}</td>
+                  <td className="p-1">{b.exploratory ? "yes" : "—"}</td>
                   <td className="p-1">{b.reasons.join("; ") || "—"}</td>
                 </tr>
               );
