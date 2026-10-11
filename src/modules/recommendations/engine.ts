@@ -136,7 +136,6 @@ function reasonsFor(s: Omit<Scored, "b"> & { b: Omit<RankBreakdown, "reasons"> }
   } else if (p.likes > 0 && s.b.predicted >= 0.15 && recentHit) {
     r.push(`Matches your recent interest in ${recentHit}`);
   }
-  if (!r.length && s.b.exploration * 1 > Math.max(s.b.semantic, s.b.predicted, 0.05) && s.b.semantic < C.explainSemanticMin * W.semantic) r.push("A new topic to explore");
   if (hoursAway <= C.soonHours) r.push("Happening soon");
   return r;
 }
@@ -245,6 +244,7 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
     }
   }
   selected.push(...tail);
+  applyExploration(selected, input, byId, priorInterests, fi >= 0);
 
   return selected.map((s) => ({
     event: s.event,
@@ -252,4 +252,98 @@ export function rankHybrid(input: EngineInput): RankedEvent[] {
     reason: s.b.reasons[0] ?? null,
     breakdown: s.b,
   }));
+}
+
+/** Is display slot k (0-based count of cards shown so far) an exploration slot? ~rate of slots. */
+export function isExplorationSlot(k: number, rate: number = C.exploration.rate): boolean {
+  return Math.floor((k + 1) * rate) > Math.floor(k * rate);
+}
+
+/** Per-topic interaction history used to pick underexplored topics and suppress rejected ones. */
+export function topicHistory(swipes: Swipe[], byId: Map<string, PulseEvent>) {
+  const seen = new Map<string, number>();
+  const liked = new Set<string>();
+  const explore = new Map<string, { likes: number; passes: number }>();
+  const likedLabels = new Set<string>();
+  for (const s of swipes) {
+    const e = s.event ?? byId.get(s.eventId);
+    if (!e) continue;
+    if (s.direction === "like") for (const k of eventLabels(e)) if (!k.startsWith("topic:")) likedLabels.add(k);
+    for (const t of e.topics ?? []) {
+      seen.set(t, (seen.get(t) ?? 0) + 1);
+      if (s.direction === "like") liked.add(t);
+      if (s.exploratory) {
+        const st = explore.get(t) ?? { likes: 0, passes: 0 };
+        if (s.direction === "like") st.likes++;
+        else st.passes++;
+        explore.set(t, st);
+      }
+    }
+  }
+  return { seen, liked, explore, likedLabels };
+}
+
+/**
+ * Exploration slot policy on top of the LinUCB/MMR order. On an exploration slot (never two in a row)
+ * the most uncertain candidate with an underexplored topic is moved into that position. Its LinUCB
+ * uncertainty bonus is removed from its score so exploration isn't counted twice. Works only on the
+ * already-filtered pool, so filters/availability are untouched.
+ */
+function applyExploration(list: Scored[], input: EngineInput, byId: Map<string, PulseEvent>, priorInterests: Set<string>, frozenOnTop: boolean) {
+  const E = C.exploration;
+  if (E.rate <= 0 || !list.length) return;
+  const h = topicHistory(input.swipes, byId);
+  const known = new Set([...h.liked, ...priorInterests]);
+  const suppressed = (t: string) => {
+    const st = h.explore.get(t);
+    return !!st && st.likes === 0 && st.passes >= E.suppressAfterPasses;
+  };
+  const value = (c: Scored): number | null => {
+    const topics = c.event.topics ?? [];
+    if (!topics.length || topics.some(suppressed)) return null;
+    const fresh = topics.filter((t) => !known.has(t) && (h.seen.get(t) ?? 0) <= E.maxSeenForNew);
+    if (!fresh.length) return null;
+    const adjacent = eventLabels(c.event).some((k) => !k.startsWith("topic:") && h.likedLabels.has(k));
+    const passes = topics.reduce((n, t) => n + (h.explore.get(t)?.passes ?? 0), 0);
+    return c.b.uncertainty + (adjacent ? E.adjacentBonus : 0) - E.passPenalty * passes + 0.1 * c.rel;
+  };
+  const mark = (c: Scored) => {
+    c.b.exploratory = true;
+    c.rel -= c.b.exploration;
+    c.b.exploration = 0;
+    c.b.reasons = ["Something new to try", ...c.b.reasons.filter((r) => r === "Happening soon")];
+  };
+  const n = input.swipes.length;
+  let prevExp = !!input.swipes[input.swipes.length - 1]?.exploratory;
+  const limit = Math.min(list.length, C.mmrPool);
+  for (let j = 0; j < limit; j++) {
+    const slot = isExplorationSlot(n + j) && !prevExp;
+    if (j === 0 && frozenOnTop) {
+      // The visible card keeps its status: it's exploratory iff it would qualify for this slot.
+      if (slot && value(list[0]!) !== null) mark(list[0]!);
+      prevExp = !!list[0]!.b.exploratory;
+      continue;
+    }
+    if (!slot) {
+      prevExp = false;
+      continue;
+    }
+    let bi = -1;
+    let bv = -Infinity;
+    for (let i = j; i < list.length; i++) {
+      const v = value(list[i]!);
+      if (v !== null && v > bv) {
+        bv = v;
+        bi = i;
+      }
+    }
+    if (bi < 0) {
+      prevExp = false;
+      continue;
+    }
+    const [pick] = list.splice(bi, 1);
+    list.splice(j, 0, pick!);
+    mark(pick!);
+    prevExp = true;
+  }
 }
