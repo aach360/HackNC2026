@@ -1,10 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { UserRound, Bot, CalendarDays, Heart, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
-import sky from "@/assets/sky-bg.jpg";
 import { useAuth } from "@/modules/auth/AuthProvider";
 import { useUserState } from "@/modules/recommendations/UserStateProvider";
-import { TasteSidebar } from "@/modules/recommendations/TasteSidebar";
 
 const NAV = [
   { to: "/", label: "Discover", icon: Sparkles },
@@ -15,19 +13,16 @@ const NAV = [
 ] as const;
 
 const BUBBLES = [
-  { l: "6%", s: 38, d: "22s", delay: "0s", drift: "30px" },
-  { l: "18%", s: 16, d: "15s", delay: "4s", drift: "-20px" },
-  { l: "34%", s: 26, d: "19s", delay: "9s", drift: "25px" },
-  { l: "58%", s: 14, d: "13s", delay: "2s", drift: "-15px" },
-  { l: "72%", s: 44, d: "26s", delay: "6s", drift: "-35px" },
-  { l: "88%", s: 20, d: "17s", delay: "11s", drift: "20px" },
+  { l: "8%", s: 28, d: "26s", delay: "0s", drift: "24px" },
+  { l: "84%", s: 36, d: "30s", delay: "8s", drift: "-28px" },
+  { l: "62%", s: 14, d: "22s", delay: "14s", drift: "-12px" },
 ];
 
 function Ambient() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <img src={sky} alt="" width={1920} height={1280} className="absolute inset-0 size-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/20 to-background/40" />
+      <div className="sky-water absolute inset-0" />
+      <div className="water-line absolute inset-x-0 bottom-0 h-[38vh]" />
       {BUBBLES.map((b, i) => (
         <span
           key={i}
@@ -65,20 +60,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-dvh">
       <Ambient />
-      <header className="aero-panel sticky top-0 z-30 rounded-none border-x-0 border-t-0">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+      <header className="sticky top-3 z-30 px-3">
+        <div className="floating-nav mx-auto flex h-14 max-w-4xl items-center justify-between rounded-full px-3 pl-4">
           <Logo />
-          <span className="hidden text-xs font-bold text-navy/70 sm:block">UNC Chapel Hill events</span>
           <nav className="hidden gap-1 md:flex" aria-label="Main">
             {NAV.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
                 activeOptions={{ exact: n.to !== "/clubs" }}
-                className="rounded-full px-4 py-1.5 text-sm font-bold text-navy hover:bg-card"
-                activeProps={{ className: "aero-btn aero-aqua" }}
+                className="nav-link rounded-full px-3.5 py-1.5 text-sm font-bold text-navy/70 hover:text-navy"
+                activeProps={{ className: "nav-active text-navy" }}
               >
                 {n.label}
+                {!!counts[n.to] && <span key={counts[n.to]} className="count-bump ml-1 rounded-full bg-grass px-1.5 text-[10px] text-grass-foreground">{counts[n.to]}</span>}
               </Link>
             ))}
           </nav>
@@ -86,27 +81,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-28 pt-4 md:grid-cols-[1fr_300px] md:pb-10">
+      <div className="mx-auto max-w-4xl px-4 pb-28 pt-5 md:pb-10">
         <main className="min-w-0">{children}</main>
-        <aside className="hidden md:block">
-          <TasteSidebar />
-        </aside>
       </div>
 
-      <nav aria-label="Main" className="aero-panel fixed inset-x-3 bottom-3 z-40 rounded-full md:hidden">
+      <nav aria-label="Main" className="floating-nav fixed inset-x-3 bottom-3 z-40 rounded-full md:hidden">
         <ul className="grid grid-cols-5 p-1.5">
           {NAV.map((n) => (
             <li key={n.to}>
               <Link
                 to={n.to}
                 activeOptions={{ exact: n.to !== "/clubs" }}
-                className="relative flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] font-bold text-navy"
-                activeProps={{ className: "aero-btn aero-aqua" }}
+                className="relative flex flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] font-bold text-navy/65"
+                activeProps={{ className: "nav-active text-navy" }}
               >
                 <n.icon className="size-5" aria-hidden />
                 {n.label}
                 {!!counts[n.to] && (
-                  <span className="absolute right-3 top-0.5 rounded-full bg-grass px-1.5 text-[10px] text-grass-foreground">{counts[n.to]}</span>
+                  <span key={counts[n.to]} className="count-bump absolute right-3 top-0.5 rounded-full bg-grass px-1.5 text-[10px] text-grass-foreground">{counts[n.to]}</span>
                 )}
               </Link>
             </li>

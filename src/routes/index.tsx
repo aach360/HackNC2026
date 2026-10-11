@@ -12,6 +12,7 @@ import { FilterSidebar } from "@/modules/discovery/FilterSidebar";
 import { EventDetail } from "@/modules/discovery/EventDetail";
 import { StatePanel } from "@/components/StatePanel";
 import { AeroButton } from "@/components/aero";
+import { TasteSidebar } from "@/modules/recommendations/TasteSidebar";
 import type { EventFilters, PulseEvent } from "@/shared/types";
 
 export const Route = createFileRoute("/")({
@@ -67,6 +68,7 @@ function Discover() {
           Showing demo events — none of the live calendars could be loaded right now.
         </div>
       )}
+      <div className="flex justify-end"><TasteSidebar /></div>
       <FilterSidebar value={filters} onChange={setFilters} onClear={() => setFilters(DEFAULT_FILTERS)} categories={categories} />
 
       {!hydrated ? (
