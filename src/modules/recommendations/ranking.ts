@@ -1,4 +1,4 @@
-import { hasEnded } from "@/shared/time";
+import { hasEnded, startsTodayOrFuture } from "@/shared/time";
 import type { EventFilters, PulseEvent, RankedEvent, Swipe, UserPreferences } from "@/shared/types";
 import { benefitLabel, formatLabel, topicLabel } from "@/shared/taxonomy";
 import { matchesDateFilter } from "@/shared/time";
@@ -65,6 +65,7 @@ export function applyFilters(events: PulseEvent[], f: EventFilters, now = new Da
   return events.filter(
     (e) =>
       !hasEnded(e, now) &&
+      startsTodayOrFuture(e, now) &&
       matchesDateFilter(e, f.date, now) &&
       (!f.category || e.categories.includes(f.category)) &&
       (!f.confirmedFreeOnly || isConfirmedFree(e)),
